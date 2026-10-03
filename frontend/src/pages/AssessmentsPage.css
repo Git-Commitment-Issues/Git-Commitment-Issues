@@ -1,0 +1,125 @@
+.assessments__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-5);
+}
+
+.assessment-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.assessment-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.assessment-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.assessment-card__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.assessment-card__title {
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+
+.assessment-card__grade {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.assessment-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.assessment-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.assessment-card__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+.assessment-card__stat svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted);
+}
+.assessment-card__stat--muted {
+  color: var(--color-text-muted);
+  margin-left: auto;
+}
+
+/* ---- Create tile --------------------------------------------------------- */
+.assessment-create {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 220px;
+  padding: var(--space-5);
+  text-align: center;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.assessment-create:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+.assessment-create__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-muted-soft);
+  color: inherit;
+}
+.assessment-create:hover .assessment-create__icon {
+  background-color: var(--color-surface);
+}
+.assessment-create__icon svg {
+  width: 22px;
+  height: 22px;
+}
+.assessment-create__label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-base);
+}
+.assessment-create__hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}

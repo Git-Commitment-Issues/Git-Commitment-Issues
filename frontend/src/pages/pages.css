@@ -1,0 +1,86 @@
+/* Shared layout utilities used across the feature pages. */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.grid-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-4);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* A simple list of rows separated by subtle dividers. */
+.row-list {
+  display: flex;
+  flex-direction: column;
+}
+.row-list > * + * {
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* Empty-state block for draft/placeholder sections. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-5);
+  color: var(--color-text-muted);
+}
+.empty-state__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-muted-soft);
+  color: var(--color-text-secondary);
+}
+.empty-state__icon svg {
+  width: 26px;
+  height: 26px;
+}
+.empty-state h3 {
+  color: var(--color-text);
+}
+.empty-state p {
+  max-width: 44ch;
+  font-size: var(--text-sm);
+}
+
+/* Reusable inline text link with brand color. */
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.text-link:hover {
+  opacity: 0.8;
+}
+.text-link svg {
+  width: 15px;
+  height: 15px;
+}

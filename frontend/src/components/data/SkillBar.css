@@ -1,0 +1,48 @@
+.skill-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skill-bar__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.skill-bar__label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.skill-bar__value {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.skill-bar__track {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-muted-soft);
+  overflow: hidden;
+}
+
+.skill-bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+.skill-bar__fill--proficient {
+  background-color: var(--color-success);
+}
+.skill-bar__fill--developing {
+  background-color: var(--color-primary);
+}
+.skill-bar__fill--needs-practice {
+  background-color: var(--color-error);
+}
