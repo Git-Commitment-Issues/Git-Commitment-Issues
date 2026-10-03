@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, FileText, Users, HelpCircle, Hash } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
 import { Button, Card, Badge } from '@/components/ui'
 import { listAssessments } from '@/data/assessmentStore'
+import { ImportPanel } from './assessments/ImportPanel'
 import './AssessmentsPage.css'
 
 /**
@@ -12,6 +14,8 @@ import './AssessmentsPage.css'
  */
 export function AssessmentsPage() {
   const assessments = listAssessments()
+  const [showScanner, setShowScanner] = useState(false)
+  const [scannedPassage, setScannedPassage] = useState('')
 
   return (
     <div className="stack">
@@ -20,11 +24,33 @@ export function AssessmentsPage() {
         title="Assessments"
         subtitle="Create a reading passage with questions, then share the join code or QR with your students."
         actions={
-          <Button icon={Plus} variant="primary">
-            <Link to="/assessments/new">Create assessment</Link>
-          </Button>
+          <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+            <Button
+              icon={FileText}
+              variant="outline"
+              onClick={() => setShowScanner((v) => !v)}
+            >
+              Scan a page
+            </Button>
+            <Button icon={Plus} variant="primary">
+              <Link to="/assessments/new">Create assessment</Link>
+            </Button>
+          </div>
         }
       />
+
+      {showScanner && (
+        <ImportPanel
+          onApply={({ passage_text }) => setScannedPassage(passage_text)}
+        />
+      )}
+
+      {scannedPassage && (
+        <Card>
+          <h3 style={{ marginTop: 0 }}>Scanned passage ready</h3>
+          <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{scannedPassage}</p>
+        </Card>
+      )}
 
       <section className="assessments__grid" aria-label="Assessments">
         {assessments.map((a) => (
