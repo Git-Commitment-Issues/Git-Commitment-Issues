@@ -6,8 +6,12 @@
 
 .assessment-card {
   display: flex;
+}
+.assessment-card__link {
+  display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  flex: 1;
 }
 
 .assessment-card__top {

@@ -1,0 +1,141 @@
+/* ---- AI/PDF seam --------------------------------------------------------- */
+.create__ai {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  border-style: dashed;
+}
+.create__ai-main {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+.create__ai-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-muted-soft);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+.create__ai-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.create__ai-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  font-size: var(--text-base);
+  margin-bottom: var(--space-1);
+}
+.create__ai-desc {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  max-width: 62ch;
+}
+
+/* ---- Passage + selects --------------------------------------------------- */
+.create__passage {
+  width: 100%;
+  padding: var(--space-3);
+  background-color: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  resize: vertical;
+}
+.create__passage:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+.create__passage::placeholder {
+  color: var(--color-text-muted);
+}
+
+.create__select {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0;
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.create__select:focus {
+  outline: none;
+}
+.create__select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* ---- Question blocks ----------------------------------------------------- */
+.create__q {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
+}
+.create__q-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.create__q-num {
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.create__q-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.create__q-remove:hover:not(:disabled) {
+  color: var(--color-error);
+  background-color: var(--color-error-soft);
+}
+.create__q-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.create__q-remove svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---- Actions ------------------------------------------------------------- */
+.create__error {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+}
+.create__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}

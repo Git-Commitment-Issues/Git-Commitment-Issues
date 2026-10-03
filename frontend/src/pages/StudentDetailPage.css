@@ -35,10 +35,10 @@
   gap: var(--space-1);
 }
 .detail__stat-value {
-  font-family: var(--font-display);
+  font-family: var(--font-heading); /* Onest — crisp for numbers */
   font-weight: 800;
   font-size: var(--text-xl);
-  letter-spacing: var(--tracking-display);
+  letter-spacing: -0.02em;
   color: var(--color-text);
 }
 .detail__stat-label {

@@ -26,10 +26,10 @@ import './ReviewPage.css'
  * note. Final verdict = COALESCE(teacher_override, ai_verdict).
  */
 export function ReviewPage() {
-  const { assessmentId } = useParams()
+  const { code } = useParams()
   const { data, loading, reload } = useAsync(
-    () => repository.getAssessment(assessmentId),
-    [assessmentId],
+    () => repository.getAssessmentByCode(code),
+    [code],
   )
 
   if (loading) {
@@ -63,7 +63,7 @@ export function ReviewPage() {
 
   return (
     <div className="stack">
-      <Link to={`/assessments/${assessment.id}`} className="detail__back">
+      <Link to={`/assessments/${assessment.access_code}`} className="detail__back">
         <ArrowLeft aria-hidden="true" /> Back to assessment
       </Link>
 

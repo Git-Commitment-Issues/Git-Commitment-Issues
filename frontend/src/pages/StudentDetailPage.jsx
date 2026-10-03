@@ -1,4 +1,4 @@
-﻿import { Link, useParams } from "react-router-dom"
+﻿import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, History, Target } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { Card, Avatar, Badge, ProficiencyBadge, EmptyState } from "@/components/ui"
@@ -9,12 +9,13 @@ import "./StudentDetailPage.css"
 
 /**
  * StudentDetailPage — the individual report view, backed by the student
- * progress API (the learner's completed assessments over time). The layout and
- * styling match the original design; the "assessment history" section, which
- * was a placeholder in the mock version, now renders real completed batches.
+ * progress API (the learner's completed assessments over time). Uses the
+ * existing design primitives; the "assessment history" section renders real
+ * completed batches from the backend.
  */
 export function StudentDetailPage() {
   const { studentId } = useParams()
+  const navigate = useNavigate()
 
   const { data, loading } = useAsync(
     () => repository.getStudentProgress(studentId),
@@ -24,9 +25,9 @@ export function StudentDetailPage() {
   if (loading) {
     return (
       <div className="stack">
-        <Link to="/students" className="detail__back">
+        <button type="button" className="detail__back" onClick={() => navigate(-1)}>
           <ArrowLeft aria-hidden="true" /> Back to students
-        </Link>
+        </button>
         <Card padded>
           <EmptyState title="Loading…" />
         </Card>
@@ -40,15 +41,15 @@ export function StudentDetailPage() {
   const completedCount = history.length
   const latestScore =
     latest?.comprehension_score != null
-      ? Math.round(latest.comprehension_score)
+      ? Math.round(Number(latest.comprehension_score))
       : null
   const latestDiagnosis = latest?.diagnosis ?? null
 
   return (
     <div className="stack">
-      <Link to="/students" className="detail__back">
+      <button type="button" className="detail__back" onClick={() => navigate(-1)}>
         <ArrowLeft aria-hidden="true" /> Back to students
-      </Link>
+      </button>
 
       <PageHeader
         title={`Student #${studentId}`}
@@ -105,21 +106,17 @@ export function StudentDetailPage() {
                         className="support-row__link"
                       >
                         <span className="support-row__meta">
-                          <span className="support-row__name">
-                            {item.title}
-                          </span>
+                          <span className="support-row__name">{item.title}</span>
                           <span className="support-row__code">
                             {item.scheduled_for}
                           </span>
                         </span>
                         <span>
                           {item.comprehension_score != null
-                            ? `${Math.round(item.comprehension_score)}%`
+                            ? `${Math.round(Number(item.comprehension_score))}%`
                             : "—"}
                         </span>
-                        <ProficiencyBadge
-                          level={diagnosisToLevel(item.diagnosis)}
-                        />
+                        <ProficiencyBadge level={diagnosisToLevel(item.diagnosis)} />
                       </Link>
                     </li>
                   ))}
@@ -150,10 +147,8 @@ export function StudentDetailPage() {
                 The most recent evaluation places this learner at{" "}
                 <strong>{diagnosisInfo(latestDiagnosis).label}</strong> with a
                 comprehension score of{" "}
-                <strong>
-                  {latestScore != null ? `${latestScore}%` : "—"}
-                </strong>
-                . Open the batch review to see per-question verdicts and the AI
+                <strong>{latestScore != null ? `${latestScore}%` : "—"}</strong>.
+                Open the batch review to see per-question verdicts and the AI
                 recommendation.
               </p>
             ) : (

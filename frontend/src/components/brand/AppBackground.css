@@ -1,0 +1,23 @@
+/* Fixed, full-viewport, behind all content. */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Dark (Grainient) variant: the gradient is bold, so veil it slightly to keep
+   foreground content readable. */
+.app-bg:not(.app-bg--grid)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-bg);
+  opacity: 0.55;
+}
+
+/* Light (ShapeGrid) variant: the canvas only draws grid lines (transparent
+   elsewhere), so paint the base surface beneath it. */
+.app-bg--grid {
+  background-color: var(--color-bg);
+}

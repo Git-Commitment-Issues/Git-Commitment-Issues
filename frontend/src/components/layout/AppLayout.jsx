@@ -1,13 +1,13 @@
 ﻿import { useEffect, useState } from "react"
-import { Outlet } from "react-router-dom"
 import { ClassroomProvider } from "@/session/ClassroomProvider"
 import { useSession } from "@/session/useSession"
 import { Sidebar } from "./Sidebar"
 import { Topbar } from "./Topbar"
+import { PageTransition } from "./PageTransition"
 import "./AppLayout.css"
 
-// Fallback shown before a session is resolved, so the shell looks identical to
-// the original design when no user is signed in yet.
+// Fallback shown before a session is resolved, so the shell still has a sane
+// user label if rendered before login (normally the auth gate prevents this).
 const PLACEHOLDER_USER = {
   name: "Ms. Elena Reyes",
   role: "Teacher · Grade 8 English",
@@ -17,7 +17,7 @@ const PLACEHOLDER_USER = {
  * AppLayout — the shell every authenticated page renders inside.
  * Owns the responsive navigation state (desktop collapse + mobile drawer),
  * provides the active-classroom selection to the teacher portal, and renders
- * the active route via <Outlet />.
+ * the active route via the direction-aware <PageTransition /> (new design).
  */
 export function AppLayout() {
   const { user, logout } = useSession()
@@ -34,8 +34,8 @@ export function AppLayout() {
     return () => window.removeEventListener("keydown", onKey)
   }, [mobileOpen])
 
-  // Use the signed-in user when available; otherwise keep the original
-  // placeholder so the design is unchanged pre-login.
+  // Use the signed-in user when available; otherwise fall back to the
+  // placeholder so the shell still renders a label.
   const topbarUser = user
     ? { name: user.name, role: "Teacher" }
     : PLACEHOLDER_USER
@@ -68,7 +68,9 @@ export function AppLayout() {
           />
           <main className="app-shell__content" id="main-content" tabIndex={-1}>
             <div className="app-shell__container">
-              <Outlet />
+              {/* New design: direction-aware route transition (renders the
+                  active route via useOutlet internally). */}
+              <PageTransition />
             </div>
           </main>
         </div>

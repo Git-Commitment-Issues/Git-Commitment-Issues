@@ -63,6 +63,57 @@ function getUser(id) {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Public learner take flow (no persisted session)                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Take + submit an assessment as a learner identified by LRN, WITHOUT touching
+ * the persisted (teacher) session. Every call threads the resolved learner id
+ * through the `userId` header option so the public /s flow never clobbers the
+ * teacher's X-User-Id in localStorage.
+ *
+ * Steps: resolve the learner by LRN -> find their own copy of the batch by
+ * access code -> start it (scheduled -> in_progress) -> submit the answers.
+ *
+ * @param {{ lrn: string, code: string, answers: Array<{answer_id:number, answer_text:string}> }} input
+ * @returns {Promise<{ learner: UserOut, assessmentId: number }>}
+ */
+async function submitAsLearner({ lrn, code, answers }) {
+  // 1. Resolve the learner (learner logs in by LRN). 401 -> caller handles.
+  const learner = await http.post("/auth/login", { lrn })
+  const uid = learner.id
+
+  // 2. Find THIS learner's assessment for the batch code (scoped to them).
+  const detail = await http.get(`/assessments/code/${code}`, { userId: uid })
+  const assessmentId = detail.id
+
+  // 3. Start it if still scheduled; ignore a benign "already started" 400.
+  try {
+    await http.post(`/assessments/${assessmentId}/start`, undefined, {
+      userId: uid,
+    })
+  } catch (err) {
+    // If it is already in progress that is fine; only re-throw hard failures.
+    if (!(err && err.status === 400)) throw err
+  }
+
+  // 4. Submit the answers (202 accepted; evaluation runs in the background).
+  await http.post(`/assessments/${assessmentId}/submit`, { answers }, {
+    userId: uid,
+  })
+
+  return { learner, assessmentId }
+}
+
+/**
+ * Look up a learner's own assessment for a code using an explicit learner id
+ * (does not read or write the persisted session).
+ */
+function getAssessmentByCodeAs(code, userId) {
+  return http.get(`/assessments/code/${code}`, { userId }).then(splitDetail)
+}
+
+/* -------------------------------------------------------------------------- */
 /* Classrooms + roster                                                        */
 /* -------------------------------------------------------------------------- */
 
@@ -211,6 +262,9 @@ export const repository = {
   // auth
   login,
   getUser,
+  // public learner take flow
+  submitAsLearner,
+  getAssessmentByCodeAs,
   // classrooms + roster
   listClassrooms,
   createClassroom,

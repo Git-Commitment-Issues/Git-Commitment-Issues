@@ -24,9 +24,14 @@ const AssessmentsPage = lazy(() =>
     default: m.AssessmentsPage,
   })),
 )
-const AssessmentDetailPage = lazy(() =>
-  import("@/pages/AssessmentDetailPage").then((m) => ({
-    default: m.AssessmentDetailPage,
+const AssessmentCreatePage = lazy(() =>
+  import("@/pages/AssessmentCreatePage").then((m) => ({
+    default: m.AssessmentCreatePage,
+  })),
+)
+const AssessmentSharePage = lazy(() =>
+  import("@/pages/AssessmentSharePage").then((m) => ({
+    default: m.AssessmentSharePage,
   })),
 )
 const ReviewPage = lazy(() =>
@@ -34,6 +39,9 @@ const ReviewPage = lazy(() =>
 )
 const SettingsPage = lazy(() =>
   import("@/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
+)
+const StudentPage = lazy(() =>
+  import("@/pages/StudentPage").then((m) => ({ default: m.StudentPage })),
 )
 const NotFoundPage = lazy(() =>
   import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
@@ -81,6 +89,24 @@ export default function App() {
       </a>
 
       <Routes>
+        {/* Public student view (QR target) — outside the teacher layout. */}
+        <Route
+          path="/s"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <StudentPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/s/:code"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <StudentPage />
+            </Suspense>
+          }
+        />
+
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
           <Route
@@ -107,19 +133,33 @@ export default function App() {
               </Suspense>
             }
           />
+          {/* New design: create flow. Declared before :code so "new" is not
+              captured as an access code. */}
           <Route
-            path="assessments/:assessmentId"
+            path="assessments/new"
             element={
               <Suspense fallback={<RouteFallback />}>
-                <AssessmentDetailPage />
+                <AssessmentCreatePage />
               </Suspense>
             }
           />
+          {/* Backend review flow (teacher corrections) for a specific
+              assessment, keyed by access code. Declared before the bare
+              :code share route so the "review" segment matches first. */}
           <Route
-            path="assessments/:assessmentId/review"
+            path="assessments/:code/review"
             element={
               <Suspense fallback={<RouteFallback />}>
                 <ReviewPage />
+              </Suspense>
+            }
+          />
+          {/* New design: share / QR session page, keyed by access code. */}
+          <Route
+            path="assessments/:code"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <AssessmentSharePage />
               </Suspense>
             }
           />

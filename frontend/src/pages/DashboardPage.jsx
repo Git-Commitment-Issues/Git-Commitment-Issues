@@ -8,7 +8,8 @@ import {
 } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { Button, Card, Avatar, ProficiencyBadge, EmptyState } from "@/components/ui"
-import { StatCard, SkillBar } from "@/components/data"
+import { StatCard } from "@/components/data"
+import { SkillBarChart, ProficiencyDonut } from "@/components/charts"
 import { useClassroom } from "@/session/useClassroom"
 import { useAsync } from "@/hooks/useAsync"
 import { repository } from "@/services"
@@ -16,11 +17,14 @@ import { skillLabel, diagnosisToLevel } from "@/domain/constants"
 import "./DashboardPage.css"
 
 /**
- * DashboardPage — the teacher's class overview, backed by the dashboard API for
- * the active classroom. Surfaces who may be struggling (needs-help), which
- * comprehension skills are weakest (skills breakdown), and batch counts. The
- * layout and styling are unchanged from the original design; only the data
- * source moved from mock data to the backend.
+ * DashboardPage — the teacher's class overview.
+ *
+ * Visual design is the new Recharts-based layout (headline stat cards, a
+ * per-skill bar chart, a proficiency-mix donut, and a "needs a closer look"
+ * list). The DATA is backend-driven: dashboard aggregates for the active
+ * classroom (needs-help, per-skill breakdown, batch counts) plus the active
+ * roster for the proficiency total. Charts/sections fall back to a clear empty
+ * state when the backend has no completed batch yet, so nothing is fabricated.
  */
 export function DashboardPage() {
   const { activeClassroom, loading: classroomLoading } = useClassroom()
@@ -31,18 +35,20 @@ export function DashboardPage() {
     // Fetch the dashboard aggregates for the default (most recent completed)
     // batch in parallel. Each call tolerates "no completed batch yet" (404) by
     // resolving to an empty shape so the page renders instead of erroring.
-    const empty = { rows: [] }
-    const [needsHelp, skills, batches] = await Promise.all([
-      repository.getNeedsHelp(classroomId).catch(() => empty),
-      repository.getSkillsBreakdown(classroomId).catch(() => empty),
+    const emptyRows = { rows: [] }
+    const [needsHelp, skills, batches, students] = await Promise.all([
+      repository.getNeedsHelp(classroomId).catch(() => emptyRows),
+      repository.getSkillsBreakdown(classroomId).catch(() => emptyRows),
       repository.listBatches(classroomId).catch(() => []),
+      repository.listStudents(classroomId).catch(() => []),
     ])
-    return { needsHelp, skills, batches }
+    return { needsHelp, skills, batches, students }
   }, [classroomId])
 
   const needHelpRows = data?.needsHelp?.rows ?? []
   const skillRows = data?.skills?.rows ?? []
   const batches = data?.batches ?? []
+  const roster = data?.students ?? []
 
   // Headline metrics derived from the real aggregates.
   const completedCount = batches.reduce((sum, b) => sum + (b.completed ?? 0), 0)
@@ -50,10 +56,36 @@ export function DashboardPage() {
   const classAverage =
     skillRows.length > 0
       ? Math.round(
-          skillRows.reduce((sum, s) => sum + (s.avg_score ?? 0), 0) /
+          skillRows.reduce((sum, s) => sum + Number(s.avg_score ?? 0), 0) /
             skillRows.length,
         )
       : null
+
+  // Per-skill chart data from the backend breakdown.
+  const skillChartData = skillRows.map((s) => ({
+    label: skillLabel(s.skill),
+    score: Math.round(Number(s.avg_score ?? 0)),
+  }))
+
+  // Proficiency mix derived from the needs-help diagnoses against the active
+  // roster size: everyone not flagged is treated as on-track. Only shown when
+  // we actually have a roster to anchor the total.
+  const rosterSize = roster.length
+  const priorityCount = needHelpRows.filter(
+    (r) => r.diagnosis === "highest_priority",
+  ).length
+  const barrierCount = needHelpRows.filter(
+    (r) => r.diagnosis === "comprehension_barrier",
+  ).length
+  const onTrackCount = Math.max(0, rosterSize - priorityCount - barrierCount)
+  const proficiencyData =
+    rosterSize > 0
+      ? [
+          { name: "On track", value: onTrackCount, tone: "success" },
+          { name: "Comprehension barrier", value: barrierCount, tone: "primary" },
+          { name: "Highest priority", value: priorityCount, tone: "error" },
+        ].filter((d) => d.value > 0)
+      : []
 
   const isLoading = classroomLoading || loading
 
@@ -65,7 +97,7 @@ export function DashboardPage() {
         subtitle="A focused read on how your class is comprehending — and who may need a closer look this week."
         actions={
           <Button icon={ClipboardList} variant="primary">
-            New assessment
+            <Link to="/assessments/new">New assessment</Link>
           </Button>
         }
       />
@@ -117,80 +149,91 @@ export function DashboardPage() {
             subtitle="Class average across the reading-comprehension skills"
           />
           <Card.Body>
-            <div className="dashboard__skills">
-              {skillRows.length > 0 ? (
-                skillRows.map((skill) => (
-                  <SkillBar
-                    key={skill.skill}
-                    label={skillLabel(skill.skill)}
-                    score={Math.round(skill.avg_score ?? 0)}
-                  />
-                ))
-              ) : (
-                <EmptyState
-                  title={isLoading ? "Loading…" : "No results yet"}
-                  message={
-                    isLoading
-                      ? ""
-                      : "Skill averages appear once a batch has graded submissions."
-                  }
-                />
-              )}
-            </div>
+            {skillChartData.length > 0 ? (
+              <SkillBarChart data={skillChartData} />
+            ) : (
+              <EmptyState
+                title={isLoading ? "Loading…" : "No results yet"}
+                message={
+                  isLoading
+                    ? ""
+                    : "Skill averages appear once a batch has graded submissions."
+                }
+              />
+            )}
           </Card.Body>
         </Card>
 
         <Card>
           <Card.Header
-            title="Needs a closer look"
-            subtitle="Lowest overall comprehension"
-            action={
-              <Link to="/students" className="text-link">
-                All students
-                <ArrowUpRight aria-hidden="true" />
-              </Link>
-            }
+            title="Proficiency mix"
+            subtitle="Where learners sit right now"
           />
           <Card.Body>
-            {needHelpRows.length > 0 ? (
-              <ul className="row-list">
-                {needHelpRows.map((student) => (
-                  <li key={student.id} className="support-row">
-                    <Link
-                      to={`/students/${student.id}`}
-                      className="support-row__link"
-                    >
-                      <Avatar name={student.name} size="sm" />
-                      <span className="support-row__meta">
-                        <span className="support-row__name">
-                          {student.name}
-                        </span>
-                        <span className="support-row__code">
-                          {student.comprehension_score != null
-                            ? `${Math.round(student.comprehension_score)}%`
-                            : "—"}
-                        </span>
-                      </span>
-                      <ProficiencyBadge
-                        level={diagnosisToLevel(student.diagnosis)}
-                      />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            {proficiencyData.length > 0 ? (
+              <ProficiencyDonut data={proficiencyData} />
             ) : (
               <EmptyState
-                title={isLoading ? "Loading…" : "Everyone on track"}
+                title={isLoading ? "Loading…" : "No learners yet"}
                 message={
                   isLoading
                     ? ""
-                    : "No learners are currently flagged for support in the latest batch."
+                    : "The proficiency mix appears once this classroom has learners and graded results."
                 }
               />
             )}
           </Card.Body>
         </Card>
       </section>
+
+      <Card>
+        <Card.Header
+          title="Needs a closer look"
+          subtitle="Lowest overall comprehension"
+          action={
+            <Link to="/students" className="text-link">
+              All students
+              <ArrowUpRight aria-hidden="true" />
+            </Link>
+          }
+        />
+        <Card.Body>
+          {needHelpRows.length > 0 ? (
+            <ul className="row-list">
+              {needHelpRows.map((student) => (
+                <li key={student.id} className="support-row">
+                  <Link
+                    to={`/students/${student.id}`}
+                    className="support-row__link"
+                  >
+                    <Avatar name={student.name} size="sm" />
+                    <span className="support-row__meta">
+                      <span className="support-row__name">{student.name}</span>
+                      <span className="support-row__code">
+                        {student.comprehension_score != null
+                          ? `${Math.round(Number(student.comprehension_score))}%`
+                          : "—"}
+                      </span>
+                    </span>
+                    <ProficiencyBadge
+                      level={diagnosisToLevel(student.diagnosis)}
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              title={isLoading ? "Loading…" : "Everyone on track"}
+              message={
+                isLoading
+                  ? ""
+                  : "No learners are currently flagged for support in the latest batch."
+              }
+            />
+          )}
+        </Card.Body>
+      </Card>
 
       {error ? (
         <Card>

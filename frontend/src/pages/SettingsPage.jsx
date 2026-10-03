@@ -23,13 +23,13 @@ export function SettingsPage() {
       <PageHeader
         eyebrow="Preferences"
         title="Settings"
-        subtitle="Manage your account, class details, and how AnaRead looks and notifies you."
+        subtitle="Manage your account, class details, and how pahina. looks and notifies you."
       />
 
       <Card>
         <Card.Header
           title="Appearance"
-          subtitle="Choose how AnaRead looks on this device"
+          subtitle="Choose how pahina. looks on this device"
         />
         <Card.Body>
           <div
@@ -104,7 +104,7 @@ export function SettingsPage() {
       <Card>
         <Card.Header
           title="Notifications"
-          subtitle="When AnaRead should alert you"
+          subtitle="When pahina. should alert you"
           action={
             <span className="settings__icon-chip">
               <Bell aria-hidden="true" />

@@ -1,8 +1,8 @@
 ﻿import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Plus, FileText, Users, Clock } from "lucide-react"
+import { Plus, FileText, Users, Clock, Hash } from "lucide-react"
 import { PageHeader } from "@/components/layout"
-import { Button, Card, StatusBadge, EmptyState } from "@/components/ui"
+import { Button, Card, Badge, StatusBadge, EmptyState } from "@/components/ui"
 import { useClassroom } from "@/session/useClassroom"
 import { useAsync } from "@/hooks/useAsync"
 import { repository } from "@/services"
@@ -11,9 +11,9 @@ import "./AssessmentsPage.css"
 
 /**
  * AssessmentsPage — create and manage reading assessments for the active
- * classroom. The assessment cards are loaded from the backend batch list; the
- * card grid, scanner (OCR ImportPanel), and styling are unchanged from the
- * original design — only the data source moved from mock data to the API.
+ * classroom. The card grid, scanner (OCR ImportPanel), and create flow follow
+ * the new design; the cards are loaded from the backend batch list for the
+ * active classroom and each opens its share screen by access code.
  */
 export function AssessmentsPage() {
   const { activeClassroom, loading: classroomLoading } = useClassroom()
@@ -34,15 +34,20 @@ export function AssessmentsPage() {
       <PageHeader
         eyebrow={activeClassroom?.name ?? "Assessments"}
         title="Assessments"
-        subtitle="Short, repeatable reading passages with skill-tagged questions. Create one, generate a QR session, and let the AI analyze the responses."
+        subtitle="Create a reading passage with questions, then share the join code or QR with your students."
         actions={
-          <Button
-            icon={Plus}
-            variant="primary"
-            onClick={() => setShowScanner((v) => !v)}
-          >
-            Create assessment
-          </Button>
+          <div style={{ display: "flex", gap: "var(--space-3)" }}>
+            <Button
+              icon={FileText}
+              variant="outline"
+              onClick={() => setShowScanner((v) => !v)}
+            >
+              Scan a page
+            </Button>
+            <Button icon={Plus} variant="primary">
+              <Link to="/assessments/new">Create assessment</Link>
+            </Button>
+          </div>
         }
       />
 
@@ -76,38 +81,36 @@ export function AssessmentsPage() {
         </Card>
       ) : (
         <section className="assessments__grid" aria-label="Assessments">
-          {assessments.map((assessment) => (
-            <Card
-              key={assessment.id}
-              interactive
-              className="assessment-card"
-            >
+          {assessments.map((a) => (
+            <Card key={a.id} interactive className="assessment-card">
               <Link
-                to={`/assessments/${assessment.id}`}
-                style={{ color: "inherit", textDecoration: "none", display: "block" }}
+                to={`/assessments/${a.access_code}`}
+                className="assessment-card__link"
               >
                 <div className="assessment-card__top">
                   <span className="assessment-card__icon">
                     <FileText aria-hidden="true" />
                   </span>
-                  <StatusBadge status={assessment.status} />
+                  <StatusBadge status={a.status} />
                 </div>
 
-                <h3 className="assessment-card__title">{assessment.title}</h3>
+                <h3 className="assessment-card__title">{a.title}</h3>
                 <p className="assessment-card__grade">
-                  Code {assessment.access_code}
+                  <Badge tone="primary" icon={Hash}>
+                    {a.access_code}
+                  </Badge>
                 </p>
 
                 <div className="assessment-card__footer">
                   <span className="assessment-card__stat">
                     <Users aria-hidden="true" />
-                    {assessment.comprehension_score != null
-                      ? `${Math.round(assessment.comprehension_score)}%`
+                    {a.comprehension_score != null
+                      ? `${Math.round(Number(a.comprehension_score))}%`
                       : "Not graded"}
                   </span>
                   <span className="assessment-card__stat assessment-card__stat--muted">
                     <Clock aria-hidden="true" />
-                    {assessment.scheduled_for}
+                    {a.scheduled_for}
                   </span>
                 </div>
               </Link>
@@ -115,19 +118,15 @@ export function AssessmentsPage() {
           ))}
 
           {/* Create tile */}
-          <button
-            type="button"
-            className="assessment-create"
-            onClick={() => setShowScanner(true)}
-          >
+          <Link to="/assessments/new" className="assessment-create">
             <span className="assessment-create__icon">
               <Plus aria-hidden="true" />
             </span>
             <span className="assessment-create__label">New assessment</span>
             <span className="assessment-create__hint">
-              Start from a scanned or typed passage
+              Paste a passage and add questions
             </span>
-          </button>
+          </Link>
         </section>
       )}
     </div>
