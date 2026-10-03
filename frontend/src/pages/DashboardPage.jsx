@@ -1,42 +1,99 @@
-import { Link } from 'react-router-dom'
+﻿import { Link } from 'react-router-dom'
 import {
   Users,
   Gauge,
   LifeBuoy,
   ClipboardList,
   ArrowUpRight,
-  Sparkles,
-  TrendingUp,
 } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
-import { Button, Card, Avatar, ProficiencyBadge } from '@/components/ui'
-import { StatCard, CountUp } from '@/components/data'
-import {
-  SkillBarChart,
-  ProficiencyDonut,
-  TrendAreaChart,
-  ChartReveal,
-} from '@/components/charts'
-import {
-  CLASS_SUMMARY,
-  CLASS_SKILL_AVERAGES,
-  CLASS_TREND,
-  PROFICIENCY_DISTRIBUTION,
-  STUDENTS_NEEDING_SUPPORT,
-  scoreToLevel,
-} from '@/data/mockData'
+import { Button, Card, Avatar, ProficiencyBadge, EmptyState } from '@/components/ui'
+import { StatCard } from '@/components/data'
+import { SkillBarChart, ProficiencyDonut, ChartReveal } from '@/components/charts'
+import { useClassroom } from '@/session/useClassroom'
+import { useAsync } from '@/hooks/useAsync'
+import { repository } from '@/services'
+import { skillLabel, diagnosisToLevel } from '@/domain/constants'
 import './DashboardPage.css'
 
 /**
- * DashboardPage — the teacher's class overview. Headline metrics, a trend of
- * class comprehension, per-skill averages, the proficiency mix, and who needs
- * a closer look — visualized with Recharts.
+ * DashboardPage — the teacher's class overview.
+ *
+ * Visual design is the Recharts-based layout (headline stat cards, a per-skill
+ * bar chart, a proficiency-mix donut, and a "needs a closer look" list), with
+ * the neon charts revealed on scroll. The DATA is backend-driven: dashboard
+ * aggregates for the active classroom (needs-help, per-skill breakdown, batch
+ * counts) plus the active roster for the proficiency total. Charts/sections
+ * fall back to a clear empty state when the backend has no completed batch yet,
+ * so nothing is fabricated.
  */
 export function DashboardPage() {
+  const { activeClassroom, loading: classroomLoading } = useClassroom()
+  const classroomId = activeClassroom?.id ?? null
+
+  const { data, loading, error } = useAsync(async () => {
+    if (!classroomId) return null
+    // Fetch the dashboard aggregates for the default (most recent completed)
+    // batch in parallel. Each call tolerates "no completed batch yet" (404) by
+    // resolving to an empty shape so the page renders instead of erroring.
+    const emptyRows = { rows: [] }
+    const [needsHelp, skills, batches, students] = await Promise.all([
+      repository.getNeedsHelp(classroomId).catch(() => emptyRows),
+      repository.getSkillsBreakdown(classroomId).catch(() => emptyRows),
+      repository.listBatches(classroomId).catch(() => []),
+      repository.listStudents(classroomId).catch(() => []),
+    ])
+    return { needsHelp, skills, batches, students }
+  }, [classroomId])
+
+  const needHelpRows = data?.needsHelp?.rows ?? []
+  const skillRows = data?.skills?.rows ?? []
+  const batches = data?.batches ?? []
+  const roster = data?.students ?? []
+
+  // Headline metrics derived from the real aggregates.
+  const completedCount = batches.reduce((sum, b) => sum + (b.completed ?? 0), 0)
+  const totalAssessments = batches.reduce((sum, b) => sum + (b.total ?? 0), 0)
+  const classAverage =
+    skillRows.length > 0
+      ? Math.round(
+          skillRows.reduce((sum, s) => sum + Number(s.avg_score ?? 0), 0) /
+            skillRows.length,
+        )
+      : null
+
+  // Per-skill chart data from the backend breakdown.
+  const skillChartData = skillRows.map((s) => ({
+    label: skillLabel(s.skill),
+    score: Math.round(Number(s.avg_score ?? 0)),
+  }))
+
+  // Proficiency mix derived from the needs-help diagnoses against the active
+  // roster size: everyone not flagged is treated as on-track. Only shown when
+  // we actually have a roster to anchor the total.
+  const rosterSize = roster.length
+  const priorityCount = needHelpRows.filter(
+    (r) => r.diagnosis === 'highest_priority',
+  ).length
+  const barrierCount = needHelpRows.filter(
+    (r) => r.diagnosis === 'comprehension_barrier',
+  ).length
+  const onTrackCount = Math.max(0, rosterSize - priorityCount - barrierCount)
+  const proficiencyData =
+    rosterSize > 0
+      ? [
+          { name: 'On track', value: onTrackCount, tone: 'success' },
+          { name: 'Comprehension barrier', value: barrierCount, tone: 'primary' },
+          { name: 'Highest priority', value: priorityCount, tone: 'error' },
+        ].filter((d) => d.value > 0)
+      : []
+
+  const isLoading = classroomLoading || loading
+
   return (
     <div className="stack">
       <PageHeader
-        eyebrow="Grade 8 English · Section A"
+        eyebrow={activeClassroom?.name ?? 'Class overview'}
         title="Class overview"
         subtitle="A focused read on how your class is comprehending — and who may need a closer look this week."
         actions={
@@ -46,66 +103,67 @@ export function DashboardPage() {
         }
       />
 
+      {!classroomId && !classroomLoading ? (
+        <Card>
+          <EmptyState
+            title="No classroom selected"
+            message="Create or select a classroom to see its reading-comprehension overview."
+          />
+        </Card>
+      ) : null}
+
       <section className="grid-stats" aria-label="Class summary">
         <StatCard
           icon={Users}
           tone="primary"
-          label="Students assessed"
-          value={CLASS_SUMMARY.studentsAssessed}
-          hint={`of ${CLASS_SUMMARY.totalStudents} students`}
+          label="Completed assessments"
+          value={isLoading ? '—' : completedCount}
+          hint={`of ${totalAssessments} assigned`}
         />
         <StatCard
           icon={Gauge}
           tone="accent"
           label="Class average"
-          value={`${CLASS_SUMMARY.classAverage}%`}
-          hint="Overall comprehension"
+          value={isLoading || classAverage == null ? '—' : `${classAverage}%`}
+          hint="Across comprehension skills"
         />
         <StatCard
           icon={LifeBuoy}
           tone="error"
           label="May need support"
-          value={CLASS_SUMMARY.needSupport}
+          value={isLoading ? '—' : needHelpRows.length}
           hint="Flagged by AI analysis"
         />
         <StatCard
           icon={ClipboardList}
           tone="success"
-          label="Assessments"
-          value={CLASS_SUMMARY.assessmentsThisMonth}
-          hint="Run this month"
+          label="Batches"
+          value={isLoading ? '—' : batches.length}
+          hint="Scheduled for this class"
         />
       </section>
-
-      {/* Trend — full width hero chart */}
-      <Card>
-        <Card.Header
-          title="Comprehension trend"
-          subtitle="Class average across recent assessments"
-          action={
-            <span className="dashboard__trend-tag">
-              <TrendingUp aria-hidden="true" />
-              <CountUp value="+13%" /> since Aug
-            </span>
-          }
-        />
-        <Card.Body>
-          <ChartReveal height={240}>
-            <TrendAreaChart data={CLASS_TREND} />
-          </ChartReveal>
-        </Card.Body>
-      </Card>
 
       <section className="grid-2">
         <Card>
           <Card.Header
             title="Comprehension by skill"
-            subtitle="Class average across the five reading-comprehension skills"
+            subtitle="Class average across the reading-comprehension skills"
           />
           <Card.Body>
-            <ChartReveal height={CLASS_SKILL_AVERAGES.length * 46}>
-              <SkillBarChart data={CLASS_SKILL_AVERAGES} />
-            </ChartReveal>
+            {skillChartData.length > 0 ? (
+              <ChartReveal height={skillChartData.length * 46}>
+                <SkillBarChart data={skillChartData} />
+              </ChartReveal>
+            ) : (
+              <EmptyState
+                title={isLoading ? 'Loading…' : 'No results yet'}
+                message={
+                  isLoading
+                    ? ''
+                    : 'Skill averages appear once a batch has graded submissions.'
+                }
+              />
+            )}
           </Card.Body>
         </Card>
 
@@ -115,28 +173,39 @@ export function DashboardPage() {
             subtitle="Where learners sit right now"
           />
           <Card.Body>
-            <ChartReveal height={200}>
-              <ProficiencyDonut data={PROFICIENCY_DISTRIBUTION} />
-            </ChartReveal>
+            {proficiencyData.length > 0 ? (
+              <ChartReveal height={200}>
+                <ProficiencyDonut data={proficiencyData} />
+              </ChartReveal>
+            ) : (
+              <EmptyState
+                title={isLoading ? 'Loading…' : 'No learners yet'}
+                message={
+                  isLoading
+                    ? ''
+                    : 'The proficiency mix appears once this classroom has learners and graded results.'
+                }
+              />
+            )}
           </Card.Body>
         </Card>
       </section>
 
-      <section className="grid-2">
-        <Card>
-          <Card.Header
-            title="Needs a closer look"
-            subtitle="Lowest overall comprehension"
-            action={
-              <Link to="/students" className="text-link">
-                All students
-                <ArrowUpRight aria-hidden="true" />
-              </Link>
-            }
-          />
-          <Card.Body>
+      <Card>
+        <Card.Header
+          title="Needs a closer look"
+          subtitle="Lowest overall comprehension"
+          action={
+            <Link to="/students" className="text-link">
+              All students
+              <ArrowUpRight aria-hidden="true" />
+            </Link>
+          }
+        />
+        <Card.Body>
+          {needHelpRows.length > 0 ? (
             <ul className="row-list">
-              {STUDENTS_NEEDING_SUPPORT.map((student) => (
+              {needHelpRows.map((student) => (
                 <li key={student.id} className="support-row">
                   <Link
                     to={`/students/${student.id}`}
@@ -145,31 +214,40 @@ export function DashboardPage() {
                     <Avatar name={student.name} size="sm" />
                     <span className="support-row__meta">
                       <span className="support-row__name">{student.name}</span>
-                      <span className="support-row__code">{student.code}</span>
+                      <span className="support-row__code">
+                        {student.comprehension_score != null
+                          ? `${Math.round(Number(student.comprehension_score))}%`
+                          : '—'}
+                      </span>
                     </span>
-                    <ProficiencyBadge level={scoreToLevel(student.overall)} />
+                    <ProficiencyBadge
+                      level={diagnosisToLevel(student.diagnosis)}
+                    />
                   </Link>
                 </li>
               ))}
             </ul>
-          </Card.Body>
-        </Card>
+          ) : (
+            <EmptyState
+              title={isLoading ? 'Loading…' : 'Everyone on track'}
+              message={
+                isLoading
+                  ? ''
+                  : 'No learners are currently flagged for support in the latest batch.'
+              }
+            />
+          )}
+        </Card.Body>
+      </Card>
 
-        <Card raised className="dashboard__insight">
-          <span className="dashboard__insight-icon">
-            <Sparkles aria-hidden="true" />
-          </span>
-          <div>
-            <h3 className="dashboard__insight-title">AI insight</h3>
-            <p className="dashboard__insight-text">
-              Inference is the weakest skill class-wide this month. Six students
-              scored below developing on inference questions, most often when
-              asked to draw conclusions not stated directly in the passage.
-              Consider a short targeted assessment focused on inference.
-            </p>
-          </div>
+      {error ? (
+        <Card>
+          <EmptyState
+            title="Couldn’t load the dashboard"
+            message="There was a problem reaching the server. Try again shortly."
+          />
         </Card>
-      </section>
+      ) : null}
     </div>
   )
 }

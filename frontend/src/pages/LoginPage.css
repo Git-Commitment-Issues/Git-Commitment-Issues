@@ -1,0 +1,92 @@
+﻿/* LoginPage — centered sign-in. Uses shared design tokens only; no new design
+   language beyond composing existing primitives. */
+
+.login {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background-color: var(--color-bg);
+}
+
+.login__card {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  /* Roomier padding so the content breathes. */
+  padding: var(--space-8) var(--space-7);
+}
+
+.login__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+}
+/* Logo mark sits on top, scaled up for presence. */
+.login__logo {
+  transform: scale(1.4);
+  margin-bottom: var(--space-4);
+}
+.login__title {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--color-text);
+}
+.login__title-accent {
+  color: var(--color-primary);
+}
+.login__subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  max-width: 32ch;
+}
+
+/* Teacher / Learner toggle */
+.login__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background-color: var(--color-muted-soft);
+  border-radius: var(--radius-md);
+}
+.login__tab {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm, var(--radius-md));
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.login__tab--active {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm, none);
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.login__submit {
+  width: 100%;
+  justify-content: center;
+}
+.login__error {
+  font-size: var(--text-sm);
+  color: var(--color-error);
+}

@@ -1,87 +1,88 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Sparkles, History, Target } from 'lucide-react'
-import { PageHeader } from '@/components/layout'
-import { Card, Avatar, Badge, ProficiencyBadge } from '@/components/ui'
-import { SkillBar, CountUp } from '@/components/data'
-import { STUDENTS, COMPREHENSION_SKILLS, scoreToLevel } from '@/data/mockData'
-import './StudentDetailPage.css'
-
-const skillLabel = (key) =>
-  COMPREHENSION_SKILLS.find((s) => s.key === key)?.label ?? key
+﻿import { Link, useNavigate, useParams } from "react-router-dom"
+import { ArrowLeft, History, Target } from "lucide-react"
+import { PageHeader } from "@/components/layout"
+import { Card, Avatar, Badge, ProficiencyBadge, EmptyState } from "@/components/ui"
+import { useAsync } from "@/hooks/useAsync"
+import { repository } from "@/services"
+import { diagnosisInfo, diagnosisToLevel } from "@/domain/constants"
+import "./StudentDetailPage.css"
 
 /**
- * StudentDetailPage — the individual report view. Shows the per-skill
- * breakdown, the AI's suggested focus area, and a placeholder assessment
- * history, mirroring the "Individual Student" section of the documentation.
+ * StudentDetailPage — the individual report view, backed by the student
+ * progress API (the learner's completed assessments over time). Uses the
+ * existing design primitives; the "assessment history" section renders real
+ * completed batches from the backend.
  */
 export function StudentDetailPage() {
   const { studentId } = useParams()
   const navigate = useNavigate()
-  const student = STUDENTS.find((s) => s.id === studentId)
 
-  if (!student) {
+  const { data, loading } = useAsync(
+    () => repository.getStudentProgress(studentId),
+    [studentId],
+  )
+
+  if (loading) {
     return (
       <div className="stack">
-        <Link to="/students" className="detail__back">
+        <button type="button" className="detail__back" onClick={() => navigate(-1)}>
           <ArrowLeft aria-hidden="true" /> Back to students
-        </Link>
+        </button>
         <Card padded>
-          <div className="empty-state">
-            <h3>Student not found</h3>
-            <p>
-              This student isn’t in the current class roster. They may have been
-              moved to another section.
-            </p>
-            <Link to="/students" className="detail__back">
-              Return to roster
-            </Link>
-          </div>
+          <EmptyState title="Loading…" />
         </Card>
       </div>
     )
   }
 
-  const skillEntries = COMPREHENSION_SKILLS.map((s) => ({
-    ...s,
-    score: student.skills[s.key] ?? 0,
-  }))
+  const history = data ?? []
+  // The most recent completed assessment anchors the headline stats.
+  const latest = history.length > 0 ? history[history.length - 1] : null
+  const completedCount = history.length
+  const latestScore =
+    latest?.comprehension_score != null
+      ? Math.round(Number(latest.comprehension_score))
+      : null
+  const latestDiagnosis = latest?.diagnosis ?? null
 
   return (
     <div className="stack">
-      <button
-        type="button"
-        className="detail__back"
-        onClick={() => navigate(-1)}
-      >
+      <button type="button" className="detail__back" onClick={() => navigate(-1)}>
         <ArrowLeft aria-hidden="true" /> Back to students
       </button>
 
       <PageHeader
-        title={student.name}
-        subtitle={`Student code ${student.code} · Last active ${student.lastActive}`}
-        actions={<ProficiencyBadge level={scoreToLevel(student.overall)} />}
+        title={`Student #${studentId}`}
+        subtitle={
+          latest
+            ? `Latest batch ${latest.access_code} · ${completedCount} completed`
+            : "No completed assessments yet"
+        }
+        actions={
+          latestDiagnosis ? (
+            <ProficiencyBadge level={diagnosisToLevel(latestDiagnosis)} />
+          ) : null
+        }
       />
 
       <div className="detail__identity">
-        <Avatar name={student.name} size="lg" />
+        <Avatar name={`#${studentId}`} size="lg" />
         <div className="detail__identity-stats">
           <div className="detail__stat">
             <span className="detail__stat-value">
-              <CountUp value={`${student.overall}%`} />
+              {latestScore != null ? `${latestScore}%` : "—"}
             </span>
-            <span className="detail__stat-label">Overall comprehension</span>
+            <span className="detail__stat-label">Latest comprehension</span>
+          </div>
+          <div className="detail__stat">
+            <span className="detail__stat-value">{completedCount}</span>
+            <span className="detail__stat-label">Assessments completed</span>
           </div>
           <div className="detail__stat">
             <span className="detail__stat-value">
-              <CountUp value={student.assessmentsTaken} />
+              {latestDiagnosis ? diagnosisInfo(latestDiagnosis).label : "—"}
             </span>
-            <span className="detail__stat-label">Assessments taken</span>
-          </div>
-          <div className="detail__stat">
-            <span className="detail__stat-value">
-              {skillLabel(student.focusSkill)}
-            </span>
-            <span className="detail__stat-label">Primary focus area</span>
+            <span className="detail__stat-label">Latest diagnosis</span>
           </div>
         </div>
       </div>
@@ -89,73 +90,76 @@ export function StudentDetailPage() {
       <section className="grid-2">
         <Card>
           <Card.Header
-            title="Skill breakdown"
-            subtitle="Latest results across the five comprehension skills"
+            title="Assessment history"
+            subtitle="Completed reading assessments over time"
           />
           <Card.Body>
-            <div className="detail__skills">
-              {skillEntries.map((skill) => (
-                <SkillBar
-                  key={skill.key}
-                  label={skill.label}
-                  score={skill.score}
-                />
-              ))}
-            </div>
+            {history.length > 0 ? (
+              <ul className="row-list">
+                {history
+                  .slice()
+                  .reverse()
+                  .map((item) => (
+                    <li key={item.access_code} className="support-row">
+                      <Link
+                        to={`/assessments/${item.access_code}`}
+                        className="support-row__link"
+                      >
+                        <span className="support-row__meta">
+                          <span className="support-row__name">{item.title}</span>
+                          <span className="support-row__code">
+                            {item.scheduled_for}
+                          </span>
+                        </span>
+                        <span>
+                          {item.comprehension_score != null
+                            ? `${Math.round(Number(item.comprehension_score))}%`
+                            : "—"}
+                        </span>
+                        <ProficiencyBadge level={diagnosisToLevel(item.diagnosis)} />
+                      </Link>
+                    </li>
+                  ))}
+              </ul>
+            ) : (
+              <EmptyState
+                variant="awaiting"
+                icon={History}
+                title="No history yet"
+                message="Completed assessments and progress over time appear here once this learner submits."
+              />
+            )}
           </Card.Body>
         </Card>
 
-        <div className="stack">
-          <Card raised className="detail__ai">
-            <span className="detail__ai-icon">
-              <Sparkles aria-hidden="true" />
-            </span>
-            <div>
-              <h3 className="detail__ai-title">AI analysis</h3>
-              <p className="detail__ai-text">
-                {student.name.split(' ')[0]} reliably identifies the main idea
-                and supporting details, but tends to struggle when a question
-                requires reading between the lines. The strongest opportunity
-                is <strong>{skillLabel(student.focusSkill)}</strong>.
+        <Card>
+          <Card.Header
+            title="Latest diagnosis"
+            action={
+              <Badge tone="accent" icon={Target}>
+                Diagnosis
+              </Badge>
+            }
+          />
+          <Card.Body>
+            {latestDiagnosis ? (
+              <p className="detail__recommendation">
+                The most recent evaluation places this learner at{" "}
+                <strong>{diagnosisInfo(latestDiagnosis).label}</strong> with a
+                comprehension score of{" "}
+                <strong>{latestScore != null ? `${latestScore}%` : "—"}</strong>.
+                Open the batch review to see per-question verdicts and the AI
+                recommendation.
               </p>
-            </div>
-          </Card>
-
-          <Card>
-            <Card.Header
-              title="Assessment history"
-              subtitle="Recent reading assessments"
-            />
-            <Card.Body>
-              <div className="empty-state">
-                <span className="empty-state__icon">
-                  <History aria-hidden="true" />
-                </span>
-                <h3>History coming soon</h3>
-                <p>
-                  Completed assessments and progress over time will appear here
-                  once connected to the assessment service.
-                </p>
-              </div>
-            </Card.Body>
-          </Card>
-        </div>
+            ) : (
+              <EmptyState
+                title="Not evaluated yet"
+                message="A diagnosis appears after the learner completes an assessment and it is graded."
+              />
+            )}
+          </Card.Body>
+        </Card>
       </section>
-
-      <Card>
-        <Card.Header
-          title="Suggested next step"
-          action={<Badge tone="accent" icon={Target}>Recommendation</Badge>}
-        />
-        <Card.Body>
-          <p className="detail__recommendation">
-            Assign a short inference-focused assessment with 4–5 questions that
-            ask {student.name.split(' ')[0]} to draw conclusions and predict
-            outcomes. Pair it with a passage at the current reading level to
-            isolate the skill rather than reading difficulty.
-          </p>
-        </Card.Body>
-      </Card>
     </div>
   )
 }
