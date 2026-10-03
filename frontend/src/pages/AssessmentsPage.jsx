@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Plus, FileText, Users, HelpCircle, Clock } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
 import { Button, Card, Badge } from '@/components/ui'
 import { ASSESSMENTS, COMPREHENSION_SKILLS } from '@/data/mockData'
+import { ImportPanel } from './assessments/ImportPanel'
 import './AssessmentsPage.css'
 
 const skillLabel = (key) =>
@@ -20,6 +22,9 @@ const STATUS = {
  * described in the documentation.
  */
 export function AssessmentsPage() {
+  const [showScanner, setShowScanner] = useState(false)
+  const [scannedPassage, setScannedPassage] = useState('')
+
   return (
     <div className="stack">
       <PageHeader
@@ -27,11 +32,28 @@ export function AssessmentsPage() {
         title="Assessments"
         subtitle="Short, repeatable reading passages with skill-tagged questions. Create one, generate a QR session, and let the AI analyze the responses."
         actions={
-          <Button icon={Plus} variant="primary">
+          <Button
+            icon={Plus}
+            variant="primary"
+            onClick={() => setShowScanner((v) => !v)}
+          >
             Create assessment
           </Button>
         }
       />
+
+      {showScanner && (
+        <ImportPanel
+          onApply={({ passage_text }) => setScannedPassage(passage_text)}
+        />
+      )}
+
+      {scannedPassage && (
+        <Card>
+          <h3 style={{ marginTop: 0 }}>Scanned passage ready</h3>
+          <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{scannedPassage}</p>
+        </Card>
+      )}
 
       <section className="assessments__grid" aria-label="Assessments">
         {ASSESSMENTS.map((assessment) => {
