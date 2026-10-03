@@ -11,7 +11,12 @@ import {
 import { PageHeader } from '@/components/layout'
 import { Button, Card, Avatar, ProficiencyBadge } from '@/components/ui'
 import { StatCard, CountUp } from '@/components/data'
-import { SkillBarChart, ProficiencyDonut, TrendAreaChart } from '@/components/charts'
+import {
+  SkillBarChart,
+  ProficiencyDonut,
+  TrendAreaChart,
+  ChartReveal,
+} from '@/components/charts'
 import {
   CLASS_SUMMARY,
   CLASS_SKILL_AVERAGES,
@@ -85,7 +90,9 @@ export function DashboardPage() {
           }
         />
         <Card.Body>
-          <TrendAreaChart data={CLASS_TREND} />
+          <ChartReveal height={240}>
+            <TrendAreaChart data={CLASS_TREND} />
+          </ChartReveal>
         </Card.Body>
       </Card>
 
@@ -96,7 +103,9 @@ export function DashboardPage() {
             subtitle="Class average across the five reading-comprehension skills"
           />
           <Card.Body>
-            <SkillBarChart data={CLASS_SKILL_AVERAGES} />
+            <ChartReveal height={CLASS_SKILL_AVERAGES.length * 46}>
+              <SkillBarChart data={CLASS_SKILL_AVERAGES} />
+            </ChartReveal>
           </Card.Body>
         </Card>
 
@@ -106,7 +115,9 @@ export function DashboardPage() {
             subtitle="Where learners sit right now"
           />
           <Card.Body>
-            <ProficiencyDonut data={PROFICIENCY_DISTRIBUTION} />
+            <ChartReveal height={200}>
+              <ProficiencyDonut data={PROFICIENCY_DISTRIBUTION} />
+            </ChartReveal>
           </Card.Body>
         </Card>
       </section>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, FileText, Users, HelpCircle, Hash } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
-import { Button, Card, Badge } from '@/components/ui'
+import { Button, Card, Badge, Modal } from '@/components/ui'
 import { listAssessments } from '@/data/assessmentStore'
 import { ImportPanel } from './assessments/ImportPanel'
 import './AssessmentsPage.css'
@@ -39,11 +39,18 @@ export function AssessmentsPage() {
         }
       />
 
-      {showScanner && (
+      <Modal
+        open={showScanner}
+        onClose={() => setShowScanner(false)}
+        size="md"
+      >
         <ImportPanel
-          onApply={({ passage_text }) => setScannedPassage(passage_text)}
+          onApply={({ passage_text }) => {
+            setScannedPassage(passage_text)
+            setShowScanner(false)
+          }}
         />
-      )}
+      </Modal>
 
       {scannedPassage && (
         <Card>
