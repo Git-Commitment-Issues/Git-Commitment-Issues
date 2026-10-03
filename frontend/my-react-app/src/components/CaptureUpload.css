@@ -1,0 +1,87 @@
+/* CaptureUpload — mobile-first; must work down to 360px width. */
+
+.capture-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+/* Hide the native file input but keep it accessible to screen readers and
+   usable via the label. */
+.capture-upload__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.capture-upload__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px; /* comfortable tap target (>= 44px baseline) */
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  background: #1f6feb;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.capture-upload__button:hover {
+  background: #1a5fd0;
+}
+
+/* Visible keyboard focus for accessibility. */
+.capture-upload__input:focus-visible + .capture-upload__button {
+  outline: 3px solid #99c2ff;
+  outline-offset: 2px;
+}
+
+.capture-upload__button[aria-disabled='true'] {
+  background: #8aa6cf;
+  cursor: progress;
+}
+
+.capture-upload__progress {
+  position: relative;
+  height: 1.5rem;
+  background: #e6ebf1;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.capture-upload__progress-bar {
+  height: 100%;
+  background: #2ea043;
+  transition: width 0.2s ease;
+}
+
+.capture-upload__progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #10311b;
+}
+
+.capture-upload__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #57606a;
+  text-align: center;
+}
