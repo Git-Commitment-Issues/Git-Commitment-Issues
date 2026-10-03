@@ -1,0 +1,163 @@
+﻿/* LearnerAssessmentPage — a learner taking or reviewing one of their own
+   assessments. Shared design tokens only. */
+
+.lresult__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  border-left: 3px solid var(--color-primary);
+}
+.lresult__score {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.lresult__score-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-2xl, var(--text-xl));
+  letter-spacing: var(--tracking-display);
+  color: var(--color-text);
+}
+.lresult__score-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.lresult__diag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.lresult__diag-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Feedback card */
+.lresult__feedback {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  border-left: 3px solid var(--color-accent);
+}
+.lresult__feedback-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent-soft, var(--color-muted-soft));
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+.lresult__feedback-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.lresult__feedback-title {
+  font-size: var(--text-base);
+  margin-bottom: var(--space-2);
+}
+.lresult__feedback-text {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-2);
+}
+.lresult__feedback-text strong {
+  color: var(--color-text);
+}
+
+/* Passage */
+.lresult__passage-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.lresult__passage-head svg {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+}
+.lresult__passage-title {
+  font-size: var(--text-base);
+}
+.lresult__passage {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed, 1.7);
+  white-space: pre-wrap;
+}
+
+/* Questions */
+.lresult__questions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lresult__q {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.lresult__q-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.lresult__q-num {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+.lresult__q-text {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+.lresult__answer {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+.lresult__evidence {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+.lresult__note {
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+}
+
+/* Take inputs */
+.lresult__input {
+  width: 100%;
+  resize: vertical;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+.lresult__input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.lresult__error {
+  font-size: var(--text-sm);
+  color: var(--color-error);
+}
+.lresult__submit,
+.lresult__ack {
+  display: flex;
+  justify-content: flex-end;
+}

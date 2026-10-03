@@ -1,4 +1,4 @@
-﻿"""Fake demo data seeder (dev only).
+"""Fake demo data seeder (dev only).
 
 Populates the database with a small, self-consistent demo dataset so the system
 can be walked end-to-end for a demo without a live AI provider or hand-entered

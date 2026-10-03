@@ -9,8 +9,7 @@ import { LoginPage } from "@/pages/LoginPage"
 import { DashboardPage } from "@/pages/DashboardPage"
 import "./pages/pages.css"
 
-// Lazy-load secondary routes so the initial bundle stays lean. Each page is
-// code-split and fetched on first navigation.
+/* --- Teacher portal pages (lazy) ----------------------------------------- */
 const StudentsPage = lazy(() =>
   import("@/pages/StudentsPage").then((m) => ({ default: m.StudentsPage })),
 )
@@ -40,11 +39,25 @@ const ReviewPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import("@/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
 )
-const StudentPage = lazy(() =>
-  import("@/pages/StudentPage").then((m) => ({ default: m.StudentPage })),
-)
 const NotFoundPage = lazy(() =>
   import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
+)
+
+/* --- Learner pages (lazy) ------------------------------------------------- */
+const LearnerHomePage = lazy(() =>
+  import("@/pages/LearnerHomePage").then((m) => ({
+    default: m.LearnerHomePage,
+  })),
+)
+const LearnerAssessmentPage = lazy(() =>
+  import("@/pages/LearnerAssessmentPage").then((m) => ({
+    default: m.LearnerAssessmentPage,
+  })),
+)
+
+/* --- Public (unauthenticated) student take flow (lazy) ------------------- */
+const StudentPage = lazy(() =>
+  import("@/pages/StudentPage").then((m) => ({ default: m.StudentPage })),
 )
 
 /** Lightweight fallback while a lazy route chunk loads. */
@@ -53,6 +66,134 @@ function RouteFallback() {
     <div style={{ padding: "var(--space-6)", color: "var(--color-text-muted)" }}>
       Loading…
     </div>
+  )
+}
+
+/**
+ * TeacherApp — the full teacher portal (dashboard, roster, authoring, review,
+ * settings). Only mounted for users whose role is "teacher".
+ */
+function TeacherApp() {
+  return (
+    <Routes>
+      {/* Public student view (QR target) — outside the teacher layout. */}
+      <Route
+        path="/s"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <StudentPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/s/:code"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <StudentPage />
+          </Suspense>
+        }
+      />
+
+      <Route element={<AppLayout />}>
+        <Route index element={<DashboardPage />} />
+        <Route
+          path="students"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <StudentsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="students/:studentId"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <StudentDetailPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="assessments"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <AssessmentsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="assessments/new"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <AssessmentCreatePage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="assessments/:code/review"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <ReviewPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="assessments/:code"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <AssessmentSharePage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <SettingsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="404"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <NotFoundPage />
+            </Suspense>
+          }
+        />
+        <Route path="*" element={<Navigate to="/404" replace />} />
+      </Route>
+    </Routes>
+  )
+}
+
+/**
+ * LearnerApp — the learner's own surface ONLY: their assessment list and the
+ * detail/take/results view for their own assessments. Deliberately has no
+ * access to the teacher portal (no dashboard, roster, authoring, or review),
+ * so a signed-in learner can never reach teacher-only features.
+ */
+function LearnerApp() {
+  return (
+    <Routes>
+      <Route
+        index
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <LearnerHomePage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="me/assessments/:assessmentId"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <LearnerAssessmentPage />
+          </Suspense>
+        }
+      />
+      {/* Any other path for a learner returns them to their home. */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
@@ -81,6 +222,11 @@ export default function App() {
     return <LoginPage />
   }
 
+  // Role-based surface: learners get ONLY their own assessments + feedback;
+  // teachers get the full portal. This is the gate that keeps students out of
+  // teacher-only features.
+  const isLearner = user.role === "learner"
+
   return (
     <>
       {/* Skip link for keyboard users — jumps past the nav to the content. */}
@@ -88,100 +234,7 @@ export default function App() {
         Skip to main content
       </a>
 
-      <Routes>
-        {/* Public student view (QR target) — outside the teacher layout. */}
-        <Route
-          path="/s"
-          element={
-            <Suspense fallback={<RouteFallback />}>
-              <StudentPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/s/:code"
-          element={
-            <Suspense fallback={<RouteFallback />}>
-              <StudentPage />
-            </Suspense>
-          }
-        />
-
-        <Route element={<AppLayout />}>
-          <Route index element={<DashboardPage />} />
-          <Route
-            path="students"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <StudentsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="students/:studentId"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <StudentDetailPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="assessments"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <AssessmentsPage />
-              </Suspense>
-            }
-          />
-          {/* New design: create flow. Declared before :code so "new" is not
-              captured as an access code. */}
-          <Route
-            path="assessments/new"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <AssessmentCreatePage />
-              </Suspense>
-            }
-          />
-          {/* Backend review flow (teacher corrections) for a specific
-              assessment, keyed by access code. Declared before the bare
-              :code share route so the "review" segment matches first. */}
-          <Route
-            path="assessments/:code/review"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <ReviewPage />
-              </Suspense>
-            }
-          />
-          {/* New design: share / QR session page, keyed by access code. */}
-          <Route
-            path="assessments/:code"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <AssessmentSharePage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="settings"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <SettingsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="404"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <NotFoundPage />
-              </Suspense>
-            }
-          />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Route>
-      </Routes>
+      {isLearner ? <LearnerApp /> : <TeacherApp />}
     </>
   )
 }

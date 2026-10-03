@@ -1,4 +1,4 @@
-﻿"""Standalone Supabase connectivity check.
+"""Standalone Supabase connectivity check.
 
 Run with::
 
