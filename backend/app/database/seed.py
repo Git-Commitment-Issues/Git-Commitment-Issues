@@ -1,20 +1,20 @@
-"""Fake demo data seeder (dev only).
+﻿"""Fake demo data seeder (dev only).
 
 Populates the database with a small, self-consistent demo dataset so the system
 can be walked end-to-end for a demo without a live AI provider or hand-entered
-data (Requirements 8.3, 7.1). All data here is fabricated — names, learner
+data (Requirements 8.3, 7.1). All data here is fabricated â€” names, learner
 reference numbers (LRNs), passages, and answers are invented for demonstration.
 
 Per the source of truth, ``seed`` creates:
 
 - 1 teacher, "Ms. Reyes".
 - 1 classroom owned by that teacher.
-- 9 fake learners (within the 8–10 range), all active.
+- 9 fake learners (within the 8â€“10 range), all active.
 - 2 reading passages, reused across the scheduled batches.
 - 3 completed batches (every learner has a completed, evaluated assessment),
   covering the full spread of diagnoses (on_track, comprehension_barrier,
   highest_priority) so the dashboards show meaningful aggregates.
-- 1–2 teacher overrides, including one **unseen** correction — an override
+- 1â€“2 teacher overrides, including one **unseen** correction â€” an override
   recorded after the learner last acknowledged corrections (so the learner-side
   "corrections" alert fires).
 - 1 upcoming batch (scheduled in the future, not yet taken).
@@ -30,8 +30,8 @@ Scoring note: scores and diagnoses are written here as *precomputed* demo
 values that match what the Scoring_Module would produce from the seeded final
 verdicts, so the seeded data is internally consistent with the live scoring
 rules (``correct=1.0``, ``partial=0.5``, ``missed/blank=0.0``; ``<40`` or an
-unoverridden blank → highest_priority; ``[40,70)`` → comprehension_barrier;
-``>=70`` → on_track).
+unoverridden blank â†’ highest_priority; ``[40,70)`` â†’ comprehension_barrier;
+``>=70`` â†’ on_track).
 """
 
 from __future__ import annotations
@@ -211,10 +211,10 @@ def _insert_assessment(
         values (
             %s, %s, %s, %s, %s,
             %s, %s, %s,
-            case when %s then now() else null end,
+            case when %s::boolean then now() else null end,
             %s, %s, %s, %s,
             %s, %s,
-            case when %s is null then null else now() - make_interval(days => %s) end
+            case when %s::int is null then null else now() - make_interval(days => %s::int) end
         )
         returning id
         """,
@@ -272,7 +272,7 @@ def _insert_answer(
             %s, %s, %s, %s,
             %s, %s, %s,
             %s,
-            case when %s is null then null else now() - make_interval(days => %s) end,
+            case when %s::int is null then null else now() - make_interval(days => %s::int) end,
             %s
         )
         returning id
@@ -439,7 +439,7 @@ def seed(conn) -> None:
     :mod:`app.database.connection`; ``returning id`` lookups read ``row["id"]``.
 
     This is destructive-free with respect to existing rows (it only inserts),
-    but it assumes an empty schema — :mod:`app.database.reset` drops and
+    but it assumes an empty schema â€” :mod:`app.database.reset` drops and
     recreates the schema before calling ``seed``.
     """
     today = manila_today()
@@ -449,7 +449,7 @@ def seed(conn) -> None:
         teacher_id = _insert_teacher(cur, TEACHER_NAME)
         classroom_id = _insert_classroom(cur, CLASSROOM_NAME, teacher_id)
 
-        # 8–10 learners (9 here), all active.
+        # 8â€“10 learners (9 here), all active.
         learner_ids = [
             _insert_learner(cur, name, lrn, classroom_id)
             for (name, lrn) in DEMO_LEARNERS
@@ -521,7 +521,7 @@ def seed(conn) -> None:
             )
             batch3_assessment_ids.append(a_id)
 
-        # --- Overrides (1–2), including one UNSEEN correction -------------
+        # --- Overrides (1â€“2), including one UNSEEN correction -------------
         # Override A: a SEEN correction on batch 1 (overridden before the
         # learner acknowledged, so no outstanding alert). First learner,
         # first answer: bump missed/partial up to 'correct'.
@@ -592,7 +592,7 @@ def seed(conn) -> None:
 
         # --- Upcoming batch: scheduled in the future, not yet taken -------
         # One scheduled assessment per learner, plus one blank answer row per
-        # question — mirroring how scheduling pre-creates rows at batch time.
+        # question â€” mirroring how scheduling pre-creates rows at batch time.
         code_future = "BATCH4"
         scheduled_future = today + timedelta(days=3)
         for learner_id in learner_ids:

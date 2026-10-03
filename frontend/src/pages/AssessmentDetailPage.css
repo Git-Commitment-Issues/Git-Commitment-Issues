@@ -1,0 +1,102 @@
+﻿/* AssessmentDetailPage — one assessment copy: passage, questions, access code.
+   Uses the shared design tokens so it matches the rest of the app. */
+
+.adetail__loading {
+  padding: var(--space-6);
+  color: var(--color-text-muted);
+}
+
+.adetail__header-actions {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.adetail__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Share / access-code card */
+.adetail__share {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  border-left: 3px solid var(--color-primary);
+}
+.adetail__share-title {
+  font-size: var(--text-base);
+  margin-bottom: var(--space-2);
+}
+.adetail__share-desc {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  max-width: 60ch;
+}
+
+/* Section headers inside cards */
+.adetail__section-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.adetail__section-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+}
+.adetail__section-title {
+  font-size: var(--text-base);
+}
+
+.adetail__passage {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed, 1.7);
+  white-space: pre-wrap;
+}
+
+/* Questions list */
+.adetail__questions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.adetail__question {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.adetail__q-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.adetail__q-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full, 999px);
+  background-color: var(--color-muted-soft);
+  color: var(--color-text-secondary);
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+.adetail__q-text {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+.adetail__q-ideas {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}

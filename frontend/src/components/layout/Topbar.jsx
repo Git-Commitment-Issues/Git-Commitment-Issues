@@ -1,19 +1,21 @@
-import { Bell, Menu, Search } from 'lucide-react'
-import { Avatar, IconButton } from '@/components/ui'
-import { ThemeToggle } from './ThemeToggle'
-import './Topbar.css'
+﻿import { Bell, Menu, Search } from "lucide-react"
+import { Avatar, IconButton } from "@/components/ui"
+import { ThemeToggle } from "./ThemeToggle"
+import "./Topbar.css"
 
 /**
  * Topbar — persistent header above the content area.
  *
  * Holds: mobile menu trigger, a quick-search field, the theme toggle, a
- * notifications indicator, and the signed-in teacher's avatar.
+ * notifications indicator, and the signed-in user's avatar. Clicking the user
+ * button signs out.
  *
  * Props:
  *   onOpenMobileNav: () => void
+ *   onLogout: () => void
  *   user: { name: string, role: string }
  */
-export function Topbar({ onOpenMobileNav, user }) {
+export function Topbar({ onOpenMobileNav, onLogout, user }) {
   return (
     <header className="topbar">
       <div className="topbar__left">
@@ -39,7 +41,12 @@ export function Topbar({ onOpenMobileNav, user }) {
         <ThemeToggle />
         <IconButton icon={Bell} label="Notifications" badge />
 
-        <button type="button" className="topbar__user">
+        <button
+          type="button"
+          className="topbar__user"
+          onClick={onLogout}
+          title="Sign out"
+        >
           <Avatar name={user.name} size="sm" />
           <span className="topbar__user-meta">
             <span className="topbar__user-name">{user.name}</span>

@@ -1,11 +1,10 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, BookOpen, Sparkles, Check, PencilLine } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
 import {
   Card,
   Badge,
-  Button,
   Input,
   EmptyState,
   VerdictBadge,
@@ -21,7 +20,7 @@ import {
 import './ReviewPage.css'
 
 /**
- * ReviewPage — teacher review & corrections (spec module 6). For each question
+ * ReviewPage â€” teacher review & corrections (spec module 6). For each question
  * the teacher sees the learner's answer, the AI verdict + evidence (empty until
  * the backend produces them), and can override the verdict with an optional
  * note. Final verdict = COALESCE(teacher_override, ai_verdict).
@@ -40,7 +39,7 @@ export function ReviewPage() {
           <ArrowLeft aria-hidden="true" /> Back
         </Link>
         <Card>
-          <div className="review__loading">Loading…</div>
+          <div className="review__loading">Loadingâ€¦</div>
         </Card>
       </div>
     )
@@ -89,7 +88,7 @@ export function ReviewPage() {
             variant="awaiting"
             icon={Sparkles}
             title="No submission yet"
-            message="This learner hasn’t submitted. Once they do, their answers appear here for review."
+            message="This learner hasnâ€™t submitted. Once they do, their answers appear here for review."
           />
         </Card>
       ) : (
@@ -152,13 +151,13 @@ function AnswerReview({ index, answer, onSaved }) {
 
       {/* Learner's answer */}
       <div className="review__block">
-        <span className="review__block-label">Learner’s answer</span>
+        <span className="review__block-label">Learnerâ€™s answer</span>
         <p className="review__answer-text">
-          {answer.answer_text ? `“${answer.answer_text}”` : 'No answer given.'}
+          {answer.answer_text ? `â€œ${answer.answer_text}â€` : 'No answer given.'}
         </p>
       </div>
 
-      {/* AI verdict + evidence — empty until the backend produces them */}
+      {/* AI verdict + evidence â€” empty until the backend produces them */}
       <div className="review__block">
         <span className="review__block-label">
           <Sparkles aria-hidden="true" /> AI assessment
