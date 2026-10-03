@@ -20,6 +20,14 @@ The dependency yields a pooled connection with a dict row factory, so
 repositories receive rows as mappings. The connection is returned to the pool
 when the request finishes; the surrounding transaction is committed on success
 and rolled back if the handler raises.
+
+Pooler note: Supabase''s connection pooler runs pgbouncer in *transaction*
+pooling mode (port 6543). In that mode a logical connection is backed by a
+different physical server connection per transaction, so psycopg3''s automatic
+server-side prepared statements break ("prepared statement _pg3_0 already
+exists"). We therefore disable automatic prepared statements on every pooled
+connection (``prepare_threshold = None``), which is the documented requirement
+for talking to a transaction-mode pooler.
 """
 
 from __future__ import annotations
@@ -38,6 +46,18 @@ from app.config import settings
 _pool: ConnectionPool | None = None
 
 
+def _configure_connection(conn: Connection) -> None:
+    """Prepare each pooled connection for use behind the transaction pooler.
+
+    Disables psycopg3''s automatic server-side prepared statements. Supabase''s
+    pgbouncer (transaction mode) does not keep the same physical backend across
+    transactions, so a prepared statement created on one request is missing on
+    the next and the reused name collides ("prepared statement _pg3_0 already
+    exists"). ``prepare_threshold = None`` turns auto-preparation off entirely.
+    """
+    conn.prepare_threshold = None
+
+
 def get_pool() -> ConnectionPool:
     """Return the process-wide connection pool, creating it on first call.
 
@@ -45,7 +65,8 @@ def get_pool() -> ConnectionPool:
     waiting for an initial connection, so pool creation never blocks or raises
     when the database is temporarily unreachable (Render free instances sleep;
     import must stay fast and offline-safe). Connections are configured with a
-    dict row factory so repositories receive mapping rows.
+    dict row factory so repositories receive mapping rows, and with automatic
+    prepared statements disabled for pgbouncer transaction-mode compatibility.
     """
     global _pool
     if _pool is None:
@@ -53,6 +74,7 @@ def get_pool() -> ConnectionPool:
             conninfo=settings.DATABASE_URL,
             open=False,
             kwargs={"row_factory": dict_row},
+            configure=_configure_connection,
         )
         # Open without waiting: do not require a live DB at construction time.
         _pool.open(wait=False)
