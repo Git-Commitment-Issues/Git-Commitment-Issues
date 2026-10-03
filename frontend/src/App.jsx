@@ -22,8 +22,21 @@ const AssessmentsPage = lazy(() =>
     default: m.AssessmentsPage,
   })),
 )
+const AssessmentCreatePage = lazy(() =>
+  import('@/pages/AssessmentCreatePage').then((m) => ({
+    default: m.AssessmentCreatePage,
+  })),
+)
+const AssessmentSharePage = lazy(() =>
+  import('@/pages/AssessmentSharePage').then((m) => ({
+    default: m.AssessmentSharePage,
+  })),
+)
 const SettingsPage = lazy(() =>
   import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+)
+const StudentPage = lazy(() =>
+  import('@/pages/StudentPage').then((m) => ({ default: m.StudentPage })),
 )
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
@@ -47,6 +60,24 @@ export default function App() {
       </a>
 
       <Routes>
+        {/* Public student view (QR target) — outside the teacher layout */}
+        <Route
+          path="/s"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <StudentPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/s/:code"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <StudentPage />
+            </Suspense>
+          }
+        />
+
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
           <Route
@@ -70,6 +101,22 @@ export default function App() {
             element={
               <Suspense fallback={<RouteFallback />}>
                 <AssessmentsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="assessments/new"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <AssessmentCreatePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="assessments/:code"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <AssessmentSharePage />
               </Suspense>
             }
           />

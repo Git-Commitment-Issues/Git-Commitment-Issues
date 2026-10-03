@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { PanelLeftClose, X, LifeBuoy } from 'lucide-react'
+import { PanelLeftClose, X, GraduationCap } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
 import { NAV_ITEMS } from '@/config/navigation'
 import { cn } from '@/lib/cn'
@@ -79,9 +79,16 @@ export function Sidebar({
       </nav>
 
       <div className="sidebar__foot">
-        <a className="sidebar__help" href="#help" title="Help & resources">
-          <LifeBuoy className="sidebar__link-icon" aria-hidden="true" />
-          <span className="sidebar__link-label">Help &amp; resources</span>
+        {/* Opens the public student view in a new tab (for preview / demo). */}
+        <a
+          className="sidebar__help"
+          href="/s"
+          target="_blank"
+          rel="noreferrer"
+          title="Open the student view"
+        >
+          <GraduationCap className="sidebar__link-icon" aria-hidden="true" />
+          <span className="sidebar__link-label">Student view</span>
         </a>
       </div>
     </aside>

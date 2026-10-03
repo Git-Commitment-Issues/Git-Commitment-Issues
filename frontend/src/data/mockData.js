@@ -187,3 +187,19 @@ export const ASSESSMENTS = [
 export const STUDENTS_NEEDING_SUPPORT = STUDENTS.filter((s) => s.overall < 70)
   .sort((a, b) => a.overall - b.overall)
   .slice(0, 4)
+
+/** Distribution of learners across proficiency bands (for the donut chart). */
+export const PROFICIENCY_DISTRIBUTION = [
+  { name: 'Proficient', value: 14, tone: 'success' },
+  { name: 'Developing', value: 10, tone: 'primary' },
+  { name: 'Needs practice', value: 6, tone: 'error' },
+]
+
+/** Class comprehension average across recent assessments (for the trend chart). */
+export const CLASS_TREND = [
+  { label: 'Aug', score: 61 },
+  { label: 'Sep', score: 66 },
+  { label: 'Oct', score: 69 },
+  { label: 'Nov', score: 72 },
+  { label: 'Dec', score: 74 },
+]

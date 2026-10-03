@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
+import { PageTransition } from './PageTransition'
 import './AppLayout.css'
 
 // Placeholder signed-in teacher until auth is wired to the backend.
@@ -52,7 +52,7 @@ export function AppLayout() {
         />
         <main className="app-shell__content" id="main-content" tabIndex={-1}>
           <div className="app-shell__container">
-            <Outlet />
+            <PageTransition />
           </div>
         </main>
       </div>

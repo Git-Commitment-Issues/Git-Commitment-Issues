@@ -1,0 +1,124 @@
+/* ---- Share / QR ---------------------------------------------------------- */
+.share {
+  display: flex;
+  gap: var(--space-6);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.share__qr {
+  padding: var(--space-3);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+.share__info {
+  flex: 1;
+  min-width: 240px;
+}
+.share__heading {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+.share__code {
+  font-family: var(--font-heading); /* Onest — crisp for the access code */
+  font-weight: 800;
+  font-size: var(--text-4xl);
+  letter-spacing: 0.14em;
+  color: var(--color-primary);
+  margin: var(--space-2) 0;
+}
+.share__hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+.share__hint strong {
+  color: var(--color-text);
+}
+.share__link-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.share__link {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-3);
+  background-color: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.share__preview {
+  margin-top: var(--space-3);
+}
+
+/* ---- Passage & questions ------------------------------------------------- */
+.share__passage-head svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+.share__passage {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  white-space: pre-wrap;
+}
+
+.share__questions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.share__question {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.share__question:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.share__q-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.share__q-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+.share__q-text {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* ---- Responses ----------------------------------------------------------- */
+.share__response {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+}
+.share__response-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}

@@ -1,8 +1,8 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Sparkles, History, Target } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
 import { Card, Avatar, Badge, ProficiencyBadge } from '@/components/ui'
-import { SkillBar } from '@/components/data'
+import { SkillBar, CountUp } from '@/components/data'
 import { STUDENTS, COMPREHENSION_SKILLS, scoreToLevel } from '@/data/mockData'
 import './StudentDetailPage.css'
 
@@ -16,6 +16,7 @@ const skillLabel = (key) =>
  */
 export function StudentDetailPage() {
   const { studentId } = useParams()
+  const navigate = useNavigate()
   const student = STUDENTS.find((s) => s.id === studentId)
 
   if (!student) {
@@ -47,9 +48,13 @@ export function StudentDetailPage() {
 
   return (
     <div className="stack">
-      <Link to="/students" className="detail__back">
+      <button
+        type="button"
+        className="detail__back"
+        onClick={() => navigate(-1)}
+      >
         <ArrowLeft aria-hidden="true" /> Back to students
-      </Link>
+      </button>
 
       <PageHeader
         title={student.name}
@@ -61,12 +66,14 @@ export function StudentDetailPage() {
         <Avatar name={student.name} size="lg" />
         <div className="detail__identity-stats">
           <div className="detail__stat">
-            <span className="detail__stat-value">{student.overall}%</span>
+            <span className="detail__stat-value">
+              <CountUp value={`${student.overall}%`} />
+            </span>
             <span className="detail__stat-label">Overall comprehension</span>
           </div>
           <div className="detail__stat">
             <span className="detail__stat-value">
-              {student.assessmentsTaken}
+              <CountUp value={student.assessmentsTaken} />
             </span>
             <span className="detail__stat-label">Assessments taken</span>
           </div>

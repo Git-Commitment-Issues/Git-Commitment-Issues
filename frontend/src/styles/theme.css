@@ -13,22 +13,23 @@
 
 :root {
   /* ---- Typography families ------------------------------------------------ */
-  --font-display: 'League Spartan', 'Outfit', system-ui, sans-serif; /* big bold headings */
-  --font-heading: 'Outfit', system-ui, sans-serif; /* section headings */
+  --font-display: 'Comfortaa', 'Onest', system-ui, sans-serif; /* elegant titles */
+  --font-heading: 'Onest', system-ui, sans-serif; /* section headings + UI */
   --font-body: 'Manrope', system-ui, -apple-system, sans-serif; /* UI + body copy */
 
-  /* ---- Type scale (fluid-ish, rem based) ---------------------------------- */
+  /* ---- Type scale (bumped up for larger headings) ------------------------- */
   --text-xs: 0.75rem; /* 12 */
   --text-sm: 0.875rem; /* 14 */
   --text-base: 1rem; /* 16 */
-  --text-lg: 1.125rem; /* 18 */
-  --text-xl: 1.375rem; /* 22 */
-  --text-2xl: 1.75rem; /* 28 */
-  --text-3xl: 2.25rem; /* 36 */
-  --text-4xl: 3rem; /* 48 */
+  --text-lg: 1.1875rem; /* 19 */
+  --text-xl: 1.5rem; /* 24 */
+  --text-2xl: 2rem; /* 32 */
+  --text-3xl: 2.75rem; /* 44 */
+  --text-4xl: 3.5rem; /* 56 */
 
-  /* Tight, editorial tracking for display/heading text */
-  --tracking-display: -0.04em;
+  /* Comfortaa is rounded + wide, so display titles get airy, elegant tracking.
+     Onest section headings stay a touch tight. */
+  --tracking-display: -0.01em;
   --tracking-heading: -0.02em;
   --tracking-body: 0;
   --tracking-wide: 0.08em; /* for small-caps eyebrow labels */
@@ -74,28 +75,30 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  /* Brand hues (raw) */
+  /* Brand hues (raw) — teal/purple identity kept as accents; red & green
+     punched up for stronger success/error signals. */
   --brand-primary: #3bb8d0;
   --brand-primary-strong: #4b91d6;
   --brand-accent: #7a4fdb;
-  --brand-success: #4dcc91;
-  --brand-error: #f07171;
+  --brand-success: #22d16b;
+  --brand-error: #ff4d4d;
 
-  /* Surfaces */
-  --color-bg: #071719;
-  --color-surface: #0d2528;
-  --color-surface-raised: #12373a;
-  --color-input: #0a2023;
+  /* Surfaces — neutral near-black (no teal cast) with a faint cool tint. */
+  --color-bg: #0a0b0d;
+  --color-surface: #141518;
+  --color-surface-raised: #1c1e22;
+  --color-surface-hover: #0f1012; /* slight darken on hover */
+  --color-input: #121316;
 
   /* Text */
-  --color-text: #f4faf9;
-  --color-text-secondary: #c3d4d6;
-  --color-text-muted: #829a9e;
-  --color-on-brand: #061417; /* text that sits on primary/accent fills */
+  --color-text: #f5f7f9;
+  --color-text-secondary: #c0c6cd;
+  --color-text-muted: #868d96;
+  --color-on-brand: #06100f; /* text that sits on primary/accent fills */
 
   /* Lines & structure */
-  --color-border: #285158;
-  --color-border-subtle: #163034;
+  --color-border: #2c2f35;
+  --color-border-subtle: #212328;
 
   /* Interactive brand roles */
   --color-primary: var(--brand-primary);
@@ -106,11 +109,16 @@
 
   /* Tinted "soft" fills for badges, chips, highlights (translucent so they
      adapt to whatever surface they sit on) */
-  --color-primary-soft: rgba(59, 184, 208, 0.14);
-  --color-accent-soft: rgba(122, 79, 219, 0.16);
-  --color-success-soft: rgba(77, 204, 145, 0.15);
-  --color-error-soft: rgba(240, 113, 113, 0.15);
-  --color-muted-soft: rgba(130, 154, 158, 0.14);
+  --color-primary-soft: rgba(59, 184, 208, 0.16);
+  --color-accent-soft: rgba(122, 79, 219, 0.18);
+  --color-success-soft: rgba(34, 209, 107, 0.18);
+  --color-error-soft: rgba(255, 77, 77, 0.18);
+  --color-muted-soft: rgba(134, 141, 150, 0.14);
+
+  /* Translucent primary for a subtle hover border-glow halo. */
+  --color-primary-glow: rgba(59, 184, 208, 0.3);
+  /* A touch stronger for the hover border line itself. */
+  --color-primary-border: rgba(59, 184, 208, 0.5);
 
   /* Focus ring */
   --color-focus: #5fd0e6;
@@ -130,21 +138,22 @@
   --brand-primary: #1b8aa3;
   --brand-primary-strong: #2f6fb0;
   --brand-accent: #6a3fcf;
-  --brand-success: #1f9d6b;
-  --brand-error: #d94c4c;
+  --brand-success: #10b35f;
+  --brand-error: #e8352f;
 
-  --color-bg: #eef4f4;
+  --color-bg: #f1f3f5;
   --color-surface: #ffffff;
-  --color-surface-raised: #f4f8f8;
+  --color-surface-raised: #f6f8fa;
+  --color-surface-hover: #eef1f4; /* slight darken on hover */
   --color-input: #ffffff;
 
-  --color-text: #0b2124;
-  --color-text-secondary: #3c5559;
-  --color-text-muted: #627579;
+  --color-text: #15171a;
+  --color-text-secondary: #454b52;
+  --color-text-muted: #6b727a;
   --color-on-brand: #ffffff;
 
-  --color-border: #d2dedf;
-  --color-border-subtle: #e4ecec;
+  --color-border: #d8dde2;
+  --color-border-subtle: #e8ecef;
 
   --color-primary: var(--brand-primary);
   --color-primary-hover: var(--brand-primary-strong);
@@ -154,9 +163,14 @@
 
   --color-primary-soft: rgba(27, 138, 163, 0.12);
   --color-accent-soft: rgba(106, 63, 207, 0.1);
-  --color-success-soft: rgba(31, 157, 107, 0.12);
-  --color-error-soft: rgba(217, 76, 76, 0.1);
-  --color-muted-soft: rgba(98, 117, 121, 0.1);
+  --color-success-soft: rgba(16, 179, 95, 0.14);
+  --color-error-soft: rgba(232, 53, 47, 0.12);
+  --color-muted-soft: rgba(107, 114, 122, 0.1);
+
+  /* Translucent primary for a subtle hover border-glow halo. */
+  --color-primary-glow: rgba(27, 138, 163, 0.28);
+  /* A touch stronger for the hover border line itself. */
+  --color-primary-border: rgba(27, 138, 163, 0.5);
 
   --color-focus: #1b8aa3;
 

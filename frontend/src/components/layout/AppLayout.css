@@ -1,7 +1,9 @@
 .app-shell {
   display: flex;
   min-height: 100vh;
-  background-color: var(--color-bg);
+  /* Transparent so the animated gradient shows behind the content area.
+     The sidebar and topbar keep their own solid/translucent surfaces. */
+  background-color: transparent;
 }
 
 .app-shell__main {

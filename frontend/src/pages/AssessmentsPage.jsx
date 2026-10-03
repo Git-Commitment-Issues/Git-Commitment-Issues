@@ -1,91 +1,70 @@
-import { Plus, FileText, Users, HelpCircle, Clock } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Plus, FileText, Users, HelpCircle, Hash } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
 import { Button, Card, Badge } from '@/components/ui'
-import { ASSESSMENTS, COMPREHENSION_SKILLS } from '@/data/mockData'
+import { listAssessments } from '@/data/assessmentStore'
 import './AssessmentsPage.css'
 
-const skillLabel = (key) =>
-  COMPREHENSION_SKILLS.find((s) => s.key === key)?.label ?? key
-
-// Map an assessment status to a badge tone + label.
-const STATUS = {
-  active: { tone: 'success', label: 'Active' },
-  draft: { tone: 'neutral', label: 'Draft' },
-  closed: { tone: 'primary', label: 'Closed' },
-}
-
 /**
- * AssessmentsPage — create and manage reading assessments. Each card is a
- * short, repeatable assessment (passage + a few skill-tagged questions) as
- * described in the documentation.
+ * AssessmentsPage — lists the assessments the teacher has created (saved in
+ * the browser). Each card opens its share screen (code + QR). The create
+ * button and tile go to the builder.
  */
 export function AssessmentsPage() {
+  const assessments = listAssessments()
+
   return (
     <div className="stack">
       <PageHeader
-        eyebrow="Grade 8 English · Section A"
+        eyebrow="Assessments"
         title="Assessments"
-        subtitle="Short, repeatable reading passages with skill-tagged questions. Create one, generate a QR session, and let the AI analyze the responses."
+        subtitle="Create a reading passage with questions, then share the join code or QR with your students."
         actions={
           <Button icon={Plus} variant="primary">
-            Create assessment
+            <Link to="/assessments/new">Create assessment</Link>
           </Button>
         }
       />
 
       <section className="assessments__grid" aria-label="Assessments">
-        {ASSESSMENTS.map((assessment) => {
-          const status = STATUS[assessment.status] ?? STATUS.draft
-          return (
-            <Card key={assessment.id} interactive className="assessment-card">
+        {assessments.map((a) => (
+          <Card key={a.code} interactive className="assessment-card">
+            <Link to={`/assessments/${a.code}`} className="assessment-card__link">
               <div className="assessment-card__top">
                 <span className="assessment-card__icon">
                   <FileText aria-hidden="true" />
                 </span>
-                <Badge tone={status.tone} dot>
-                  {status.label}
+                <Badge tone="primary" icon={Hash}>
+                  {a.code}
                 </Badge>
               </div>
 
-              <h3 className="assessment-card__title">{assessment.title}</h3>
-              <p className="assessment-card__grade">{assessment.grade}</p>
-
-              <ul className="assessment-card__skills">
-                {assessment.skills.map((key) => (
-                  <li key={key}>
-                    <Badge tone="primary">{skillLabel(key)}</Badge>
-                  </li>
-                ))}
-              </ul>
+              <h3 className="assessment-card__title">{a.title}</h3>
 
               <div className="assessment-card__footer">
                 <span className="assessment-card__stat">
                   <HelpCircle aria-hidden="true" />
-                  {assessment.questions} questions
+                  {a.questions.length} questions
                 </span>
                 <span className="assessment-card__stat">
                   <Users aria-hidden="true" />
-                  {assessment.responses} responses
-                </span>
-                <span className="assessment-card__stat assessment-card__stat--muted">
-                  <Clock aria-hidden="true" />
-                  {assessment.updated}
+                  {a.responses.length} responses
                 </span>
               </div>
-            </Card>
-          )
-        })}
+            </Link>
+          </Card>
+        ))}
 
         {/* Create tile */}
-        <button type="button" className="assessment-create">
+        <Link to="/assessments/new" className="assessment-create">
           <span className="assessment-create__icon">
             <Plus aria-hidden="true" />
           </span>
           <span className="assessment-create__label">New assessment</span>
           <span className="assessment-create__hint">
-            Start from a passage or template
+            Paste a passage and add questions
           </span>
-        </button>
+        </Link>
       </section>
     </div>
   )
