@@ -104,3 +104,62 @@ def build_evaluation_prompt(passage: str, questions: list[dict]) -> str:
     lines.append(json.dumps(RESPONSE_CONTRACT, indent=2))
 
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Assessment extraction (OCR / pasted text -> structured draft)
+# ---------------------------------------------------------------------------
+
+# System rules for turning raw scanned/pasted text into a structured reading
+# assessment draft. JSON-only; skills constrained to the backend taxonomy.
+EXTRACTION_SYSTEM_RULES = (
+    "You are a reading-assessment author. You are given raw text scanned from a "
+    "printed page (it may contain OCR noise). Produce a clean reading passage "
+    "and 3 to 5 comprehension questions about it. Return JSON ONLY — no "
+    "markdown, no commentary. Fix obvious OCR errors in the passage, but do not "
+    "invent facts that are not in the text. Each question must target exactly "
+    "one skill from this set: literal, inference, vocabulary, sequencing. For "
+    "each question also give short comma-separated 'expected_ideas' a correct "
+    "answer should mention. Do not include any student names, LRNs, or "
+    "classroom names."
+)
+
+# The exact extraction-response shape, embedded in the prompt so the model
+# returns a parseable draft that matches the create-assessment contract.
+EXTRACTION_CONTRACT = {
+    "title": "<a short title for the passage>",
+    "category": "<a one-word genre/category, e.g. Fiction or Science>",
+    "passage_text": "<the cleaned reading passage>",
+    "questions": [
+        {
+            "question_text": "<the question>",
+            "skill": "literal | inference | vocabulary | sequencing",
+            "expected_ideas": "<comma-separated key points a correct answer has>",
+        }
+    ],
+}
+
+
+def build_extraction_prompt(raw_text: str) -> str:
+    """Build the prompt that turns raw scanned/pasted text into a draft.
+
+    Args:
+        raw_text: The OCR / pasted source text (may be noisy).
+
+    Returns:
+        A single prompt string: the extraction system rules, the raw source
+        text, and the required JSON draft contract. The response is parsed and
+        validated by ``app.features.assessments.extraction_schemas``.
+    """
+    return "\n".join(
+        [
+            EXTRACTION_SYSTEM_RULES,
+            "",
+            "SOURCE TEXT:",
+            raw_text,
+            "",
+            "Respond with JSON ONLY matching exactly this shape "
+            "(3 to 5 questions, each skill from the allowed set):",
+            json.dumps(EXTRACTION_CONTRACT, indent=2),
+        ]
+    )

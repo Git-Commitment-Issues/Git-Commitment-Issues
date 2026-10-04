@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import {
   ArrowLeft,
@@ -29,7 +29,7 @@ export function AssessmentSharePage() {
   const [copied, setCopied] = useState(false)
 
   const { data, loading } = useAsync(
-    () => repository.getAssessmentByCode(code),
+    () => repository.getBatchByCode(code),
     [code],
   )
 

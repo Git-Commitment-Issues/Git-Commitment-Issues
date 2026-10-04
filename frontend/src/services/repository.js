@@ -1,4 +1,4 @@
-﻿/* =============================================================================
+/* =============================================================================
    repository — the frontend data access layer over the FastAPI backend.
    -----------------------------------------------------------------------------
    Every page/provider talks to the backend through this object only. It maps
@@ -171,6 +171,16 @@ function getAssessmentByCode(code) {
   return http.get(`/assessments/code/${code}`).then(splitDetail)
 }
 
+/**
+ * Teacher view of a batch by access code. Unlike getAssessmentByCode (which is
+ * learner-scoped to the caller's own row), this returns the batch's shared
+ * content for any batch in a classroom the teacher owns — used by the share /
+ * detail screen after creating an assessment.
+ */
+function getBatchByCode(code) {
+  return http.get(`/assessments/batch/${code}`).then(splitDetail)
+}
+
 function listClassroomAssessments(classroomId) {
   return http.get(`/classrooms/${classroomId}/assessments`)
 }
@@ -179,6 +189,15 @@ function scheduleAssessment(payload) {
   // payload matches CreateAssessmentRequest:
   // { classroom_id, title, category, passage_text, scheduled_for, questions }
   return http.post("/assessments", payload)
+}
+
+/**
+ * Draft an assessment from raw scanned/pasted text (teacher-only). Returns the
+ * structured draft { title, category, passage_text, questions:[{question_text,
+ * skill, expected_ideas}] } — the AI structuring of OCR output. Does not save.
+ */
+function extractAssessment(rawText) {
+  return http.post("/assessments/extract", { raw_text: rawText })
 }
 
 function startAssessment(assessmentId) {
@@ -275,8 +294,10 @@ export const repository = {
   // assessments
   getAssessment,
   getAssessmentByCode,
+  getBatchByCode,
   listClassroomAssessments,
   scheduleAssessment,
+  extractAssessment,
   startAssessment,
   submitAssessment,
   retryEvaluation,

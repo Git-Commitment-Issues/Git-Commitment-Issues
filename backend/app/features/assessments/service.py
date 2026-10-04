@@ -369,3 +369,30 @@ def _load_owned_assessment(
             detail="Assessment not found.",
         )
     return assessment
+
+
+# ---------------------------------------------------------------------------
+# Teacher batch view (share / detail by access code)
+# ---------------------------------------------------------------------------
+
+
+def get_batch_for_teacher(db: Connection[DictRow], access_code: str, teacher) -> dict:
+    """Return a batch's shared content for the teacher share/detail view.
+
+    Looks up the batch by ``access_code`` scoped to a classroom the teacher owns
+    (so teachers only see their own batches), and returns the representative
+    assessment plus its question rows as ``{"assessment": {...}, "answers":[...]}``
+    — the same shape the learner-view/detail endpoints return. The questions are
+    the batch's shared question set (one representative learner's rows); no
+    learner's private answers are exposed here.
+
+    Raises ``404`` when no such batch exists for this teacher.
+    """
+    row = repo.get_batch_by_code_for_teacher(db, access_code, teacher.id)
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Assessment not found.",
+        )
+    answers = repo.load_answers(db, row["id"])
+    return {"assessment": dict(row), "answers": [dict(a) for a in answers]}

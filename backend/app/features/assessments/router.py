@@ -1,4 +1,4 @@
-"""Assessments feature router — scheduling, taking, and learner-view endpoints.
+"""Assessments feature router ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â scheduling, taking, and learner-view endpoints.
 
 Per the strictly layered architecture (*SoT: router -> service -> repository*),
 this router only parses requests and maps service results onto response
@@ -12,19 +12,19 @@ tasks that share this single module and one ``router`` object:
 
 Endpoints:
 
-- ``POST /assessments`` — teacher-only; schedule a batch (``201``).
-- ``GET /classrooms/{classroom_id}/assessments`` — teacher-only; list a
+- ``POST /assessments`` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â teacher-only; schedule a batch (``201``).
+- ``GET /classrooms/{classroom_id}/assessments`` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â teacher-only; list a
   classroom's batches.
-- ``GET /assessments/code/{code}`` — a learner reads their own assessment by
+- ``GET /assessments/code/{code}`` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a learner reads their own assessment by
   Access_Code.
-- ``POST /assessments/{assessment_id}/start`` — a learner starts their own
+- ``POST /assessments/{assessment_id}/start`` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a learner starts their own
   assessment.
-- ``POST /assessments/{assessment_id}/submit`` — a learner submits answers;
+- ``POST /assessments/{assessment_id}/submit`` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a learner submits answers;
   ``202`` with a single background evaluation enqueued (Requirement 3.6).
-- ``GET /assessments/{assessment_id}`` — a learner reads their own assessment
+- ``GET /assessments/{assessment_id}`` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a learner reads their own assessment
   by id.
-- ``GET /me/assessments`` — a learner's own list (upcoming/previous + alert).
-- ``POST /assessments/{assessment_id}/seen`` — a learner acknowledges
+- ``GET /me/assessments`` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a learner's own list (upcoming/previous + alert).
+- ``POST /assessments/{assessment_id}/seen`` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a learner acknowledges
   corrections.
 
 **Routing order matters**: ``GET /assessments/code/{code}`` is declared before
@@ -40,7 +40,14 @@ from psycopg import Connection
 from psycopg.rows import DictRow
 
 from app.database.connection import get_db
-from app.features.assessments import learner_view_service, service
+from pydantic import BaseModel
+
+from app.features.assessments import (
+    extraction_service,
+    learner_view_service,
+    service,
+)
+from app.features.assessments.extraction_schemas import ExtractedAssessment
 from app.features.assessments.schemas import (
     AssessmentDetailOut,
     AssessmentSummaryOut,
@@ -54,7 +61,7 @@ router = APIRouter(tags=["assessments"])
 
 
 # ---------------------------------------------------------------------------
-# Scheduling + teacher batch listing (Task 10.5 — Requirements 5.1)
+# Scheduling + teacher batch listing (Task 10.5 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Requirements 5.1)
 # ---------------------------------------------------------------------------
 
 
@@ -76,6 +83,29 @@ def create_assessment(
     """
     summary = service.schedule_batch(db, body, current_user)
     return SchedulingSummaryOut(**summary)
+
+
+class ExtractRequest(BaseModel):
+    """Raw scanned/pasted text to turn into an assessment draft."""
+
+    raw_text: str
+
+
+@router.post("/assessments/extract", response_model=ExtractedAssessment)
+def extract_assessment(
+    body: ExtractRequest,
+    _current_user: CurrentUser = Depends(require_teacher),
+) -> ExtractedAssessment:
+    """Draft an assessment from raw scanned/pasted text (teacher-only).
+
+    Sends the text to the AI client, which returns a structured draft
+    (title, category, passage, and 3-5 skill-tagged questions). Does NOT
+    write to the database â€” the teacher reviews/edits the draft and submits
+    it through the normal create flow. Raises ``422`` when the text is too
+    short or the AI could not produce a valid draft after one retry.
+    """
+    draft = extraction_service.extract_assessment(body.raw_text)
+    return ExtractedAssessment(**draft)
 
 
 @router.get(
@@ -104,7 +134,7 @@ def list_classroom_assessments(
 
 
 # ---------------------------------------------------------------------------
-# Taking — by Access_Code (Task 10.5). Declared BEFORE the /{assessment_id}
+# Taking ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â by Access_Code (Task 10.5). Declared BEFORE the /{assessment_id}
 # routes so the literal "code" segment is never captured as an id.
 # ---------------------------------------------------------------------------
 
@@ -123,8 +153,52 @@ def get_assessment_by_code(
     return learner_view_service.get_assessment_by_code(db, code, current_user)
 
 
+@router.get("/assessments/batch/{code}", response_model=AssessmentDetailOut)
+def get_batch_by_code(
+    code: str,
+    db: Connection[DictRow] = Depends(get_db),
+    current_user: CurrentUser = Depends(require_teacher),
+) -> AssessmentDetailOut:
+    """Return a batch's shared content by access code (teacher-only).
+
+    Unlike ``/assessments/code/{code}`` (which is learner-scoped to the
+    caller's own row), this returns the batch's representative assessment
+    for any batch in a classroom the teacher owns, so the teacher share /
+    detail screen can show the passage and questions after creating a batch.
+    Raises ``404`` when the batch is not in one of the teacher's classrooms.
+    """
+    detail = service.get_batch_for_teacher(db, code, current_user)
+    assessment = detail["assessment"]
+    answers = detail["answers"]
+    return AssessmentDetailOut(
+        id=assessment["id"],
+        title=assessment["title"],
+        category=assessment["category"],
+        passage_text=assessment["passage_text"],
+        status=assessment["status"],
+        comprehension_score=assessment["comprehension_score"],
+        diagnosis=assessment["diagnosis"],
+        evaluation=assessment["evaluation"],
+        recommendation=assessment["recommendation"],
+        evaluation_error=assessment["evaluation_error"],
+        has_correction_alert=False,
+        answers=[
+            {
+                "id": a["id"],
+                "question_text": a["question_text"],
+                "skill": a["skill"],
+                "answer_text": a.get("answer_text"),
+                "final_verdict": a.get("teacher_override") or a.get("ai_verdict"),
+                "evidence": a.get("evidence"),
+                "override_note": a.get("override_note"),
+            }
+            for a in answers
+        ],
+    )
+
+
 # ---------------------------------------------------------------------------
-# Taking — start / submit (Task 10.5 — Requirements 3.1, 3.3, 3.6)
+# Taking ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â start / submit (Task 10.5 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Requirements 3.1, 3.3, 3.6)
 # ---------------------------------------------------------------------------
 
 
@@ -167,7 +241,7 @@ def submit_assessment(
 
 
 # ---------------------------------------------------------------------------
-# Learner views (Task 11.3 — Requirements 4.1, 4.6, 4.7)
+# Learner views (Task 11.3 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Requirements 4.1, 4.6, 4.7)
 # ---------------------------------------------------------------------------
 
 

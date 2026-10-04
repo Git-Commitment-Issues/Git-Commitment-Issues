@@ -1,25 +1,33 @@
-﻿import { useState } from "react"
-import { Link } from "react-router-dom"
-import { Plus, FileText, Users, Clock, Hash } from "lucide-react"
+import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { Plus, FileText, Users, Clock, Hash, Sparkles } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { Button, Card, Badge, StatusBadge, EmptyState } from "@/components/ui"
 import { useClassroom } from "@/session/useClassroom"
 import { useAsync } from "@/hooks/useAsync"
-import { repository } from "@/services"
+import { repository, ApiError } from "@/services"
 import { ImportPanel } from "./assessments/ImportPanel"
 import "./AssessmentsPage.css"
 
 /**
  * AssessmentsPage — create and manage reading assessments for the active
  * classroom. The card grid, scanner (OCR ImportPanel), and create flow follow
- * the new design; the cards are loaded from the backend batch list for the
- * active classroom and each opens its share screen by access code.
+ * the new design; cards load from the backend batch list and open their share
+ * screen by access code.
+ *
+ * Scan-to-draft: after the on-device OCR produces text, "Draft with AI" sends
+ * it to the backend extraction endpoint, which uses the chatbot to structure it
+ * into a passage + skill-tagged questions, then opens the create form prefilled
+ * with that draft for the teacher to review and save.
  */
 export function AssessmentsPage() {
   const { activeClassroom, loading: classroomLoading } = useClassroom()
   const classroomId = activeClassroom?.id ?? null
+  const navigate = useNavigate()
   const [showScanner, setShowScanner] = useState(false)
   const [scannedPassage, setScannedPassage] = useState("")
+  const [drafting, setDrafting] = useState(false)
+  const [draftError, setDraftError] = useState(null)
 
   const { data, loading } = useAsync(() => {
     if (!classroomId) return Promise.resolve([])
@@ -28,6 +36,24 @@ export function AssessmentsPage() {
 
   const assessments = data ?? []
   const isLoading = classroomLoading || loading
+
+  const draftWithAI = async () => {
+    setDraftError(null)
+    setDrafting(true)
+    try {
+      const draft = await repository.extractAssessment(scannedPassage)
+      // Hand the draft to the create form via router state to prefill it.
+      navigate("/assessments/new", { state: { draft } })
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setDraftError(err.message || "Couldn’t draft from that text.")
+      } else {
+        setDraftError("Couldn’t reach the server. Try again shortly.")
+      }
+    } finally {
+      setDrafting(false)
+    }
+  }
 
   return (
     <div className="stack">
@@ -53,7 +79,10 @@ export function AssessmentsPage() {
 
       {showScanner && (
         <ImportPanel
-          onApply={({ passage_text }) => setScannedPassage(passage_text)}
+          onApply={({ passage_text }) => {
+            setScannedPassage(passage_text)
+            setDraftError(null)
+          }}
         />
       )}
 
@@ -61,6 +90,34 @@ export function AssessmentsPage() {
         <Card>
           <h3 style={{ marginTop: 0 }}>Scanned passage ready</h3>
           <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{scannedPassage}</p>
+          <div
+            style={{
+              display: "flex",
+              gap: "var(--space-3)",
+              alignItems: "center",
+              marginTop: "var(--space-4)",
+              flexWrap: "wrap",
+            }}
+          >
+            <Button icon={Sparkles} onClick={draftWithAI} disabled={drafting}>
+              {drafting ? "Drafting with AI…" : "Draft assessment with AI"}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() =>
+                navigate("/assessments/new", {
+                  state: { draft: { passage_text: scannedPassage } },
+                })
+              }
+            >
+              Use text as passage only
+            </Button>
+          </div>
+          {draftError ? (
+            <p style={{ color: "var(--color-error)", marginTop: "var(--space-3)" }} role="alert">
+              {draftError}
+            </p>
+          ) : null}
         </Card>
       )}
 
