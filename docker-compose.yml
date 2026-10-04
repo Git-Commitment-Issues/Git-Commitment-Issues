@@ -1,0 +1,48 @@
+# Reading Comprehension Screener - full-stack local orchestration.
+#
+# Backend  : FastAPI (uvicorn) on :8000, config/secrets from backend/.env.
+# Frontend : React/Vite static bundle served by Nginx on :5173 -> :80.
+#
+# Postgres is NOT run here - the backend connects to the external Supabase
+# instance named in backend/.env (DATABASE_URL).
+#
+# Usage:
+#   docker compose up --build
+#   Frontend -> http://localhost:5173    Backend -> http://localhost:8000
+
+services:
+  backend:
+    build:
+      context: ./backend
+    image: anaread-backend:latest
+    # Secrets and config come from the gitignored backend/.env file so nothing
+    # sensitive is baked into the image or committed to compose.
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4).status==200 else sys.exit(1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the static bundle at build time. The browser (not the
+        # container) calls this URL, so it points at the host-published port.
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    image: anaread-frontend:latest
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

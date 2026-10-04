@@ -370,3 +370,51 @@ def load_answers(
             (assessment_id,),
         )
         return cur.fetchall()
+
+
+def get_batch_by_code_for_teacher(
+    db: Connection[DictRow], access_code: str, teacher_id: int
+) -> Optional[DictRow]:
+    """Return one representative assessment for a batch the teacher owns.
+
+    An access code identifies a batch (one assessment row per learner). For the
+    teacher share/detail view we want the shared batch content (passage,
+    questions, title) regardless of which learner's row it is, but only if the
+    teacher owns the batch's classroom. This joins ``assessments`` to
+    ``classrooms`` and filters on ``classrooms.teacher_id`` so a teacher can only
+    read batches in their own classrooms; it returns the lowest-id row for the
+    code as the representative, or ``None`` when no such batch exists for this
+    teacher.
+    """
+    with db.cursor() as cur:
+        cur.execute(
+            """
+            SELECT a.id,
+                   a.learner_id,
+                   a.classroom_id,
+                   a.access_code,
+                   a.title,
+                   a.category,
+                   a.passage_text,
+                   a.scheduled_for,
+                   a.status,
+                   a.completed_at,
+                   a.reading_accuracy,
+                   a.comprehension_score,
+                   a.diagnosis,
+                   a.evaluation,
+                   a.recommendation,
+                   a.evaluated_by,
+                   a.evaluation_error,
+                   a.corrections_seen_at,
+                   a.created_at
+            FROM assessments a
+            JOIN classrooms c ON c.id = a.classroom_id
+            WHERE a.access_code = %s
+              AND c.teacher_id = %s
+            ORDER BY a.id ASC
+            LIMIT 1
+            """,
+            (access_code, teacher_id),
+        )
+        return cur.fetchone()

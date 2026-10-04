@@ -139,3 +139,9 @@
   justify-content: flex-end;
   gap: var(--space-3);
 }
+
+/* AI draft confirmation note */
+.create__draft-note {
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+}

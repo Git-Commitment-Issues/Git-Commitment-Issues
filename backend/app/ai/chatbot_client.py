@@ -1,47 +1,93 @@
-# ai/chatbot_client.py  — STUB BOILERPLATE until provider is announced.
-# Implements AIClient so the evaluation pipeline runs end-to-end today.
+# ai/chatbot_client.py  — AI provider client (OpenRouter, OpenAI-compatible).
 #
-# Scaffolding boundary (design.md): this is the ONLY module that changes when
-# the AI provider is confirmed. The real request/response handling replaces the
-# body of ``complete`` (see the commented block below); everything else in the
-# codebase — service orchestration, parsing/validation, scoring — stays put.
+# Scaffolding boundary (design.md): this is the ONLY module that changed when
+# the AI provider was confirmed. Everything else in the codebase — service
+# orchestration, parsing/validation, scoring — stays put. ``complete`` now makes
+# a real chat-completions request; a deterministic stub remains as an automatic
+# fallback so the pipeline still runs end-to-end when no provider is configured.
 import json
 
-import httpx  # noqa: F401 — used by the (future) real provider call below.
+import httpx
 
 from app.ai.base import AIClient
 from app.config import settings
 
+# A short system instruction forcing JSON-only output. The evaluation prompt
+# (ai/prompts.py) already documents the exact response contract; this just makes
+# sure the model returns a single JSON object the pipeline can parse.
+_SYSTEM_JSON = (
+    "You are a reading-comprehension evaluation engine. Respond with a single "
+    "valid JSON object only — no markdown, no code fences, no commentary."
+)
+
 
 class ChatbotClient(AIClient):
-    """
-    Boilerplate implementation. When the AI provider is announced, fill in the
-    real request/response handling here (confirm JSON output, request format,
-    token pricing). NOTHING ELSE in the codebase should need to change.
+    """OpenAI-compatible chat-completions client (used with OpenRouter).
+
+    ``complete`` sends the evaluation prompt and returns the model's raw text,
+    which the evaluation service parses/validates. If the client is not
+    configured (no api_key/base_url/model), it falls back to a deterministic,
+    contract-shaped stub so the app still works without a provider.
     """
 
-    def __init__(self, api_key: str, base_url: str, model: str, timeout: float = 15.0):
+    def __init__(self, api_key: str, base_url: str, model: str, timeout: float = 20.0):
         self._api_key = api_key
-        self._base_url = base_url
+        self._base_url = (base_url or "").rstrip("/")
         self._model = model
         self._timeout = timeout
 
+    @property
+    def _configured(self) -> bool:
+        return bool(self._api_key and self._base_url and self._model)
+
     def complete(self, prompt: str) -> str:
-        # --- real provider call goes here, e.g.: -------------------------
-        # with httpx.Client(timeout=self._timeout) as client:
-        #     resp = client.post(
-        #         f"{self._base_url}/chat/completions",
-        #         headers={"Authorization": f"Bearer {self._api_key}"},
-        #         json={"model": self._model, "temperature": 0.0,
-        #               "messages": [{"role": "user", "content": prompt}]},
-        #     )
-        #     resp.raise_for_status()
-        #     return resp.json()["choices"][0]["message"]["content"]
-        # -----------------------------------------------------------------
-        # STUB: return a deterministic, contract-shaped placeholder so the
-        # pipeline exercises parsing/validation/scoring before the provider
-        # exists. Replace this entire method when the provider is announced.
-        return self._stub_response(prompt)
+        # Without full configuration, fall back to the deterministic stub so the
+        # pipeline (and the demo) keep working offline / without a key.
+        if not self._configured:
+            return self._stub_response(prompt)
+
+        try:
+            with httpx.Client(timeout=self._timeout) as client:
+                resp = client.post(
+                    f"{self._base_url}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self._api_key}",
+                        "Content-Type": "application/json",
+                        # Optional OpenRouter attribution headers (harmless if
+                        # the provider ignores them).
+                        "HTTP-Referer": "https://anaread.local",
+                        "X-Title": "AnaRead Reading Comprehension Screener",
+                    },
+                    json={
+                        "model": self._model,
+                        "temperature": 0,
+                        "response_format": {"type": "json_object"},
+                        "messages": [
+                            {"role": "system", "content": _SYSTEM_JSON},
+                            {"role": "user", "content": prompt},
+                        ],
+                    },
+                )
+                resp.raise_for_status()
+                data = resp.json()
+
+            # Log token usage + model to the console (Requirement 6.7); the
+            # service logs latency around this call.
+            usage = data.get("usage") or {}
+            print(
+                f"[ai] model={self._model} "
+                f"prompt_tokens={usage.get('prompt_tokens')} "
+                f"completion_tokens={usage.get('completion_tokens')} "
+                f"total_tokens={usage.get('total_tokens')}"
+            )
+
+            return data["choices"][0]["message"]["content"]
+        except (httpx.HTTPError, KeyError, ValueError) as exc:
+            # Any transport/shape error surfaces as an invalid response; the
+            # service retries once then records an evaluation_error. Returning an
+            # empty string makes parsing fail cleanly rather than raising here.
+            print(f"[ai] request failed: {exc!r}")
+            return ""
 
     @staticmethod
     def _stub_response(prompt: str) -> str:
@@ -57,7 +103,7 @@ class ChatbotClient(AIClient):
 
 
 def build_ai_client() -> AIClient:
-    """Factory used by the evaluation service. Swap implementation here later."""
+    """Factory used by the evaluation service. Reads provider config from env."""
     return ChatbotClient(
         api_key=settings.AI_API_KEY,
         base_url=settings.AI_BASE_URL,

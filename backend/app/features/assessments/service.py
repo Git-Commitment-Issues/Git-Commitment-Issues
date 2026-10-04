@@ -293,6 +293,14 @@ def submit_assessment(
             detail="This assessment has already been completed.",
         )
 
+    # Date gate (mirrors start, Requirements 3.1/3.2): an assessment cannot be
+    # submitted before its scheduled Manila date, even if /start was skipped.
+    if assessment["scheduled_for"] > manila_today():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This assessment cannot be taken before its scheduled date.",
+        )
+
     # status is 'scheduled' or 'in_progress': save answers, then complete.
     # Only update answers that belong to this assessment (ignore stray ids so a
     # submission cannot write to another assessment's rows).
@@ -369,3 +377,30 @@ def _load_owned_assessment(
             detail="Assessment not found.",
         )
     return assessment
+
+
+# ---------------------------------------------------------------------------
+# Teacher batch view (share / detail by access code)
+# ---------------------------------------------------------------------------
+
+
+def get_batch_for_teacher(db: Connection[DictRow], access_code: str, teacher) -> dict:
+    """Return a batch's shared content for the teacher share/detail view.
+
+    Looks up the batch by ``access_code`` scoped to a classroom the teacher owns
+    (so teachers only see their own batches), and returns the representative
+    assessment plus its question rows as ``{"assessment": {...}, "answers":[...]}``
+    — the same shape the learner-view/detail endpoints return. The questions are
+    the batch's shared question set (one representative learner's rows); no
+    learner's private answers are exposed here.
+
+    Raises ``404`` when no such batch exists for this teacher.
+    """
+    row = repo.get_batch_by_code_for_teacher(db, access_code, teacher.id)
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Assessment not found.",
+        )
+    answers = repo.load_answers(db, row["id"])
+    return {"assessment": dict(row), "answers": [dict(a) for a in answers]}

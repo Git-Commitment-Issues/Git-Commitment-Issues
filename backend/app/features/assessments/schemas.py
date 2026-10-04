@@ -97,6 +97,8 @@ class AssessmentDetailOut(BaseModel):
     evaluation_error: Optional[str]
     has_correction_alert: bool
     answers: list[AnswerOut]
+    # Date the assessment opens (Manila). Lets the client show "not open yet".
+    scheduled_for: Optional[date] = None
 
 
 class AssessmentSummaryOut(BaseModel):

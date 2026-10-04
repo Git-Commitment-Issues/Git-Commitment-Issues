@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { Trans, useTranslation } from "react-i18next"
 import {
@@ -31,7 +31,7 @@ export function AssessmentSharePage() {
   const [copied, setCopied] = useState(false)
 
   const { data, loading } = useAsync(
-    () => repository.getAssessmentByCode(code),
+    () => repository.getBatchByCode(code),
     [code],
   )
 
