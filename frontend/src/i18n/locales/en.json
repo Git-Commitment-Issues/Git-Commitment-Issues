@@ -349,6 +349,8 @@
   },
   "register": {
     "dialogLabel": "Create an account",
+    "titleBeforeBrand": "Create your",
+    "titleAfterBrand": "account",
     "close": "Close",
     "subtitle": "Join as a teacher to run reading checks, or as a learner to take them.",
     "registerAs": "Register as",

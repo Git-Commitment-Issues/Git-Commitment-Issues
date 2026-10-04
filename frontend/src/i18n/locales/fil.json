@@ -352,6 +352,8 @@
   },
   "register": {
     "dialogLabel": "Gumawa ng account",
+    "titleBeforeBrand": "Gumawa ng",
+    "titleAfterBrand": "account",
     "close": "Isara",
     "subtitle": "Sumali bilang guro upang magpatakbo ng mga pagsusuri sa pagbasa, o bilang mag-aaral upang sagutan ang mga ito.",
     "registerAs": "Magrehistro bilang",

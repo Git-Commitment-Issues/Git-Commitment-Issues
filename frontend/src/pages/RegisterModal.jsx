@@ -72,22 +72,21 @@ export function RegisterModal({ open, onClose }) {
             type="button"
             className="reg__close"
             onClick={close}
-            aria-label="Close"
+            aria-label={t('register.close')}
           >
             <X aria-hidden="true" />
           </button>
 
           <div className="reg__head">
             <h2 className="reg__title">
-              Create your pahina<span className="reg__title-accent">.</span> account
+              {t('register.titleBeforeBrand')} pahina
+              <span className="reg__title-accent">.</span>{' '}
+              {t('register.titleAfterBrand')}
             </h2>
-            <p className="reg__subtitle">
-              Join as a teacher to run reading checks, or as a learner to take
-              them.
-            </p>
+            <p className="reg__subtitle">{t('register.subtitle')}</p>
           </div>
 
-          <div className="reg__tabs" role="tablist" aria-label="Register as">
+          <div className="reg__tabs" role="tablist" aria-label={t('register.registerAs')}>
             <button
               type="button"
               role="tab"
@@ -98,7 +97,7 @@ export function RegisterModal({ open, onClose }) {
                 setNotice('')
               }}
             >
-              Teacher
+              {t('register.teacher')}
             </button>
             <button
               type="button"
@@ -110,35 +109,39 @@ export function RegisterModal({ open, onClose }) {
                 setNotice('')
               }}
             >
-              Learner
+              {t('register.learner')}
             </button>
           </div>
 
           <form className="reg__form" onSubmit={handleSubmit}>
             <Input
-              label="Full name"
+              label={t('register.fullName')}
               icon={User}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={mode === 'teacher' ? 'e.g. Ms. Reyes' : 'e.g. Juan dela Cruz'}
+              placeholder={
+                mode === 'teacher'
+                  ? t('register.teacherNamePlaceholder')
+                  : t('register.learnerNamePlaceholder')
+              }
               required
             />
 
             {mode === 'teacher' ? (
               <Input
-                label="School or classroom (optional)"
+                label={t('register.schoolOptional')}
                 icon={School}
                 value={classroom}
                 onChange={(e) => setClassroom(e.target.value)}
-                placeholder="e.g. Grade 8 — Section A"
+                placeholder={t('register.schoolPlaceholder')}
               />
             ) : (
               <Input
-                label="Learner Reference Number"
+                label={t('register.lrnLabel')}
                 icon={Hash}
                 value={lrn}
                 onChange={(e) => setLrn(e.target.value)}
-                placeholder="12-digit LRN"
+                placeholder={t('register.lrnPlaceholder')}
                 inputMode="numeric"
                 required
               />
@@ -151,14 +154,14 @@ export function RegisterModal({ open, onClose }) {
             ) : null}
 
             <Button type="submit" variant="primary" className="reg__submit">
-              Create account
+              {t('register.createAccount')}
             </Button>
           </form>
 
           <p className="reg__foot">
-            Already have an account?{' '}
+            {t('register.haveAccount')}{' '}
             <button type="button" className="reg__link" onClick={close}>
-              Sign in
+              {t('register.signIn')}
             </button>
           </p>
         </div>
