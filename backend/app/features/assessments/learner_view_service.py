@@ -194,6 +194,7 @@ def _build_detail(
         # Present in the failed state (Requirement 4.5); null otherwise.
         evaluation_error=assessment["evaluation_error"],
         has_correction_alert=repo.has_correction_alert(db, assessment["id"]),
+        scheduled_for=assessment["scheduled_for"],
         answers=answers,
     )
 

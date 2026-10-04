@@ -293,6 +293,14 @@ def submit_assessment(
             detail="This assessment has already been completed.",
         )
 
+    # Date gate (mirrors start, Requirements 3.1/3.2): an assessment cannot be
+    # submitted before its scheduled Manila date, even if /start was skipped.
+    if assessment["scheduled_for"] > manila_today():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This assessment cannot be taken before its scheduled date.",
+        )
+
     # status is 'scheduled' or 'in_progress': save answers, then complete.
     # Only update answers that belong to this assessment (ignore stray ids so a
     # submission cannot write to another assessment's rows).

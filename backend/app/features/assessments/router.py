@@ -182,6 +182,7 @@ def get_batch_by_code(
         recommendation=assessment["recommendation"],
         evaluation_error=assessment["evaluation_error"],
         has_correction_alert=False,
+        scheduled_for=assessment["scheduled_for"],
         answers=[
             {
                 "id": a["id"],

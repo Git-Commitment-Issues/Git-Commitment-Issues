@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
   ArrowLeft,
@@ -18,7 +18,7 @@ import {
   EmptyState,
 } from "@/components/ui"
 import { useAsync } from "@/hooks/useAsync"
-import { repository } from "@/services"
+import { repository, ApiError } from "@/services"
 import {
   skillLabel,
   finalVerdict,
@@ -61,8 +61,39 @@ export function LearnerAssessmentPage() {
   const assessment = data?.assessment
   const questionRows = data?.answers ?? []
 
+  // Today in Asia/Manila as YYYY-MM-DD (same calendar the backend gates on).
+  const todayManila = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+  }).format(new Date())
+  const isFuture =
+    assessment?.status === "scheduled" &&
+    Boolean(assessment?.scheduled_for) &&
+    assessment.scheduled_for > todayManila
+
+  // After submitting, evaluation runs in the background. Poll until a result
+  // (diagnosis) or an evaluation error shows up, so the page updates itself.
+  const pending =
+    Boolean(assessment) &&
+    (assessment.status === "completed" || submitted) &&
+    assessment.diagnosis == null &&
+    !assessment.evaluation_error
+
+  useEffect(() => {
+    if (!pending) return undefined
+    let tries = 0
+    const id = setInterval(() => {
+      tries += 1
+      if (tries > 40) {
+        clearInterval(id) // stop after ~2.5 minutes
+        return
+      }
+      reload()
+    }, 4000)
+    return () => clearInterval(id)
+  }, [pending, reload])
+
   const body = (() => {
-    if (loading) {
+    if (loading && !data) {
       return (
         <Card>
           <EmptyState title="Loading…" />
@@ -112,6 +143,12 @@ export function LearnerAssessmentPage() {
               ) : null}
             </div>
           </Card>
+
+          {pending ? (
+            <p style={{ color: "var(--color-text-muted)", fontSize: "var(--text-sm)" }} role="status">
+              Checking your answers… this page updates automatically.
+            </p>
+          ) : null}
 
           {/* Teacher / AI feedback */}
           {assessment.evaluation || assessment.recommendation ? (
@@ -208,6 +245,18 @@ export function LearnerAssessmentPage() {
       )
     }
 
+    /* ---- Not open yet: future-dated --------------------------------- */
+    if (isFuture) {
+      return (
+        <Card>
+          <EmptyState
+            title="Not open yet"
+            message={`This assessment opens on ${assessment.scheduled_for}. Come back then to take it.`}
+          />
+        </Card>
+      )
+    }
+
     /* ---- Not completed: take it --------------------------------------- */
     const allAnswered = questionRows.every((q) => (answers[q.id] ?? "").trim())
 
@@ -219,11 +268,10 @@ export function LearnerAssessmentPage() {
       }
       setSubmitting(true)
       try {
-        // Move scheduled -> in_progress (ignore a benign already-started 400).
-        try {
+        // Move scheduled -> in_progress. Skip when already in progress; any
+        // other start error (e.g. not open yet) is shown to the learner.
+        if (assessment.status === "scheduled") {
           await repository.startAssessment(assessment.id)
-        } catch {
-          // already in progress is fine
         }
         const payload = questionRows.map((q) => ({
           answer_id: q.id,
@@ -232,8 +280,12 @@ export function LearnerAssessmentPage() {
         await repository.submitAssessment(assessment.id, payload)
         setSubmitted(true)
         reload()
-      } catch {
-        setError("Couldn’t submit. Check your connection and try again.")
+      } catch (err) {
+        setError(
+          err instanceof ApiError && err.message
+            ? err.message
+            : "Couldn’t submit. Check your connection and try again.",
+        )
       } finally {
         setSubmitting(false)
       }
