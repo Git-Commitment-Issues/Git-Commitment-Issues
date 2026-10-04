@@ -1,8 +1,10 @@
 ﻿import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ArrowRight, BookOpen, Send, CheckCircle2, Hash } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 import { Logo } from "@/components/brand/Logo"
-import { ThemeToggle } from "@/components/layout"
+import { Mascot } from "@/components/brand/Mascot"
+import { ThemeToggle, LanguageToggle } from "@/components/layout"
 import { Button, Card, Input, Badge } from "@/components/ui"
 import { repository, ApiError } from "@/services"
 import { skillLabel } from "@/domain/constants"
@@ -15,7 +17,10 @@ function Shell({ children }) {
     <div className="student">
       <header className="student__bar">
         <Logo />
-        <ThemeToggle />
+        <div className="student__bar-right">
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
       </header>
       <main className="student__main" id="main-content">
         <div className="student__container">{children}</div>
@@ -37,6 +42,7 @@ function Shell({ children }) {
  * browser.
  */
 export function StudentPage() {
+  const { t } = useTranslation()
   const { code: codeParam } = useParams()
   const navigate = useNavigate()
 
@@ -67,7 +73,7 @@ export function StudentPage() {
     setLoadError(null)
     const value = lrn.trim()
     if (!value) {
-      setLoadError("Enter your LRN to open your copy.")
+      setLoadError(t("student.errorNoLrn"))
       return
     }
     setLoading(true)
@@ -81,11 +87,11 @@ export function StudentPage() {
       setLoaded({ assessment, answers: ans, learnerId: learner.id })
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
-        setLoadError("No active learner found with that LRN.")
+        setLoadError(t("student.errorNoLearner"))
       } else if (err instanceof ApiError && err.status === 404) {
-        setLoadError("You don't have a copy of this assessment, or the code is wrong.")
+        setLoadError(t("student.errorNoCopy"))
       } else {
-        setLoadError("Couldn’t load your assessment. Try again shortly.")
+        setLoadError(t("student.errorLoad"))
       }
     } finally {
       setLoading(false)
@@ -97,22 +103,20 @@ export function StudentPage() {
     return (
       <Shell>
         <Card raised className="student__join">
-          <h1 className="student__join-title">Join an assessment</h1>
-          <p className="student__join-sub">
-            Enter the code from your teacher’s screen.
-          </p>
+          <h1 className="student__join-title">{t("student.joinTitle")}</h1>
+          <p className="student__join-sub">{t("student.joinSub")}</p>
           <form className="student__join-form" onSubmit={openByCode} noValidate>
             <Input
-              label="Access code"
+              label={t("student.accessCode")}
               icon={Hash}
               value={codeInput}
               onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
-              placeholder="e.g. 7K9Q2M"
+              placeholder={t("student.accessCodePlaceholder")}
               className="student__code-input"
               autoFocus
             />
             <Button type="submit" icon={ArrowRight} fullWidth>
-              Open
+              {t("common.open")}
             </Button>
           </form>
         </Card>
@@ -125,13 +129,19 @@ export function StudentPage() {
     return (
       <Shell>
         <Card raised className="student__done">
-          <span className="student__done-icon">
+          <Mascot
+            variant="star"
+            size="lg"
+            float
+            className="student__done-mascot"
+          />
+          <span className="student__done-badge">
             <CheckCircle2 aria-hidden="true" />
+            {t("student.submitted")}
           </span>
-          <h1 className="student__done-title">All done — nice work</h1>
+          <h1 className="student__done-title">{t("student.allDone")}</h1>
           <p className="student__done-sub">
-            Your answers to “{loaded?.assessment?.title}” were submitted. Your
-            teacher will see your results once they’re analyzed.
+            {t("student.submittedSub", { title: loaded?.assessment?.title })}
           </p>
         </Card>
       </Shell>
@@ -143,22 +153,26 @@ export function StudentPage() {
     return (
       <Shell>
         <Card raised className="student__join">
-          <h1 className="student__join-title">Open your assessment</h1>
+          <h1 className="student__join-title">{t("student.openYourAssessment")}</h1>
           <p className="student__join-sub">
-            Code <strong>{codeParam}</strong>. Enter your LRN to load your copy.
+            <Trans
+              i18nKey="student.codeInstruction"
+              values={{ code: codeParam }}
+              components={{ 1: <strong /> }}
+            />
           </p>
           <form className="student__join-form" onSubmit={loadMine} noValidate>
             <Input
-              label="Learner Reference Number"
+              label={t("student.lrnLabel")}
               value={lrn}
               onChange={(e) => setLrn(e.target.value)}
-              placeholder="12-digit LRN"
+              placeholder={t("student.lrnPlaceholder")}
               inputMode="numeric"
               error={loadError}
               autoFocus
             />
             <Button type="submit" icon={ArrowRight} fullWidth disabled={loading}>
-              {loading ? "Opening…" : "Open"}
+              {loading ? t("common.opening") : t("common.open")}
             </Button>
           </form>
           <button
@@ -166,7 +180,7 @@ export function StudentPage() {
             className="text-link student__join-switch"
             onClick={() => navigate("/s")}
           >
-            Enter a different code
+            {t("student.enterDifferentCode")}
           </button>
         </Card>
       </Shell>
@@ -182,7 +196,7 @@ export function StudentPage() {
   const onSubmit = async () => {
     setTakeError(null)
     if (!allAnswered) {
-      setTakeError("Answer every question before submitting.")
+      setTakeError(t("student.answerEvery"))
       return
     }
     setSubmitting(true)
@@ -199,9 +213,9 @@ export function StudentPage() {
       setSubmitted(true)
     } catch (err) {
       if (err instanceof ApiError && err.status === 400) {
-        setTakeError("This assessment was already submitted.")
+        setTakeError(t("student.errorAlreadySubmitted"))
       } else {
-        setTakeError("Couldn’t submit. Check your connection and try again.")
+        setTakeError(t("student.errorSubmit"))
       }
     } finally {
       setSubmitting(false)
@@ -212,15 +226,23 @@ export function StudentPage() {
     <Shell>
       <div className="stack animate-in">
         <header className="student__header">
-          <p className="student__eyebrow">Assessment</p>
-          <h1 className="student__title">{assessment.title}</h1>
+          <div className="student__header-text">
+            <p className="student__eyebrow">{t("student.assessment")}</p>
+            <h1 className="student__title">{assessment.title}</h1>
+          </div>
+          <Mascot
+            variant="reading"
+            size="md"
+            float
+            className="student__header-mascot"
+          />
         </header>
 
         {alreadyCompleted ? (
           <Card>
             <div className="empty-state">
-              <h3>Already submitted</h3>
-              <p>You’ve already completed this assessment. Ask your teacher if you think this is a mistake.</p>
+              <h3>{t("student.alreadySubmitted")}</h3>
+              <p>{t("student.alreadySubmittedSub")}</p>
             </div>
           </Card>
         ) : (
@@ -228,7 +250,7 @@ export function StudentPage() {
             <Card>
               <div className="student__passage-head">
                 <BookOpen aria-hidden="true" />
-                <h2 className="student__passage-title">Read the passage</h2>
+                <h2 className="student__passage-title">{t("student.readPassage")}</h2>
               </div>
               <p className="student__passage">{assessment.passage_text}</p>
             </Card>
@@ -238,15 +260,19 @@ export function StudentPage() {
                 <li key={q.id}>
                   <Card>
                     <div className="student__q-head">
-                      <span className="student__q-num">Question {i + 1}</span>
-                      <Badge tone="neutral">{skillLabel(q.skill)}</Badge>
+                      <span className="student__q-num">
+                        {t("student.question", { number: i + 1 })}
+                      </span>
+                      <Badge tone="neutral">
+                        {t(`skills.${q.skill}`, skillLabel(q.skill))}
+                      </Badge>
                     </div>
                     <p className="student__q-text">{q.question_text}</p>
                     <textarea
                       className="student__answer"
                       rows={4}
-                      placeholder="Type your answer…"
-                      aria-label={`Answer to question ${i + 1}`}
+                      placeholder={t("student.typeAnswer")}
+                      aria-label={t("student.answerLabel", { number: i + 1 })}
                       value={answers[q.id] ?? ""}
                       onChange={(e) =>
                         setAnswers((a) => ({ ...a, [q.id]: e.target.value }))
@@ -269,7 +295,7 @@ export function StudentPage() {
                 onClick={onSubmit}
                 disabled={!allAnswered || submitting}
               >
-                {submitting ? "Submitting…" : "Submit answers"}
+                {submitting ? t("student.submitting") : t("student.submitAnswers")}
               </Button>
             </div>
           </>

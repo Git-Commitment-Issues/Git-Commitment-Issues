@@ -81,6 +81,39 @@
   max-width: 56ch;
 }
 
+/* Section titles ("To do" / "Completed") — larger than the default card title,
+   with a tinted icon chip, so they clearly outrank the assessment rows below. */
+.learner-section__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+}
+.learner-section__title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+.learner-section__title-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+.learner-section__title-icon--todo {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.learner-section__title-icon--done {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+}
+
 /* New-feedback banner */
 .learner__alert {
   display: flex;

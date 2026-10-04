@@ -1,5 +1,5 @@
 ﻿import { lazy, Suspense } from "react"
-import { Navigate, Route, Routes } from "react-router-dom"
+import { Navigate, Route, Routes, useLocation } from "react-router-dom"
 import { AppLayout } from "@/components/layout"
 import { useSession } from "@/session/useSession"
 import { LoginPage } from "@/pages/LoginPage"
@@ -210,6 +210,21 @@ function LearnerApp() {
 
 export default function App() {
   const { user, loading } = useSession()
+  const location = useLocation()
+
+  // Assessment QR targets must be reachable before authentication. Learners
+  // identify themselves by LRN inside StudentPage; this does not alter the
+  // teacher session stored in the browser.
+  if (location.pathname === "/s" || location.pathname.startsWith("/s/")) {
+    return (
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/s" element={<StudentPage />} />
+          <Route path="/s/:code" element={<StudentPage />} />
+        </Routes>
+      </Suspense>
+    )
+  }
 
   // While restoring a persisted session, show a neutral placeholder so we don't
   // flash the login screen for an already-signed-in user.

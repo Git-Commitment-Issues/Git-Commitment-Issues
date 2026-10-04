@@ -1,7 +1,9 @@
 ﻿import { Bell, Menu, Search } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { Avatar, IconButton } from "@/components/ui"
 import { ThemeToggle } from "./ThemeToggle"
+import { LanguageToggle } from "./LanguageToggle"
 import "./Topbar.css"
 
 /**
@@ -16,6 +18,7 @@ import "./Topbar.css"
  *   user: { name: string, role: string }
  */
 export function Topbar({ onOpenMobileNav, user }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (
@@ -23,7 +26,7 @@ export function Topbar({ onOpenMobileNav, user }) {
       <div className="topbar__left">
         <IconButton
           icon={Menu}
-          label="Open navigation"
+          label={t("topbar.openNav")}
           className="topbar__menu"
           onClick={onOpenMobileNav}
         />
@@ -33,21 +36,22 @@ export function Topbar({ onOpenMobileNav, user }) {
           <input
             className="topbar__search-input"
             type="search"
-            placeholder="Search students, assessments…"
-            aria-label="Search students and assessments"
+            placeholder={t("topbar.searchPlaceholder")}
+            aria-label={t("topbar.searchLabel")}
           />
         </div>
       </div>
 
       <div className="topbar__right">
+        <LanguageToggle />
         <ThemeToggle />
-        <IconButton icon={Bell} label="Notifications" badge />
+        <IconButton icon={Bell} label={t("topbar.notifications")} badge />
 
         <button
           type="button"
           className="topbar__user"
           onClick={() => navigate("/profile")}
-          title="View profile"
+          title={t("topbar.viewProfile")}
         >
           <Avatar name={user.name} size="sm" />
           <span className="topbar__user-meta">

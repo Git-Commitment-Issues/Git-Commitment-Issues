@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { X, User, Hash, School } from 'lucide-react'
 import { Input, Button } from '@/components/ui'
 import registrationImage from '@/assets/pahina-registration-image.svg'
@@ -20,6 +21,7 @@ import './RegisterModal.css'
  *   onClose: () => void
  */
 export function RegisterModal({ open, onClose }) {
+  const { t } = useTranslation()
   const [mode, setMode] = useState('teacher') // 'teacher' | 'learner'
   const [name, setName] = useState('')
   const [lrn, setLrn] = useState('')
@@ -45,10 +47,7 @@ export function RegisterModal({ open, onClose }) {
     // TODO: when the backend adds account creation, call it here, e.g.
     //   await repository.register({ role: mode, name, lrn, classroom })
     // For now there is no endpoint, so we never fabricate a success.
-    setNotice(
-      'Self sign-up isn’t available yet. Teachers are set up by an admin, and ' +
-        'learners are added to a class by their teacher. Ask them to create your account.',
-    )
+    setNotice(t('register.notice'))
   }
 
   return createPortal(
@@ -57,7 +56,7 @@ export function RegisterModal({ open, onClose }) {
         className="reg__panel"
         role="dialog"
         aria-modal="true"
-        aria-label="Create an account"
+        aria-label={t('register.dialogLabel')}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left column — full-bleed illustration, no padding. */}

@@ -1,4 +1,5 @@
 ﻿import { Link, useNavigate, useParams } from "react-router-dom"
+import { Trans, useTranslation } from "react-i18next"
 import { ArrowLeft, History, Target } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { Card, Avatar, Badge, ProficiencyBadge, EmptyState } from "@/components/ui"
@@ -14,6 +15,7 @@ import "./StudentDetailPage.css"
  * completed batches from the backend.
  */
 export function StudentDetailPage() {
+  const { t } = useTranslation()
   const { studentId } = useParams()
   const navigate = useNavigate()
 
@@ -26,10 +28,10 @@ export function StudentDetailPage() {
     return (
       <div className="stack">
         <button type="button" className="detail__back" onClick={() => navigate(-1)}>
-          <ArrowLeft aria-hidden="true" /> Back to students
+          <ArrowLeft aria-hidden="true" /> {t("studentDetail.backToStudents")}
         </button>
         <Card padded>
-          <EmptyState title="Loading…" />
+          <EmptyState title={t("common.loading")} />
         </Card>
       </div>
     )
@@ -48,15 +50,18 @@ export function StudentDetailPage() {
   return (
     <div className="stack">
       <button type="button" className="detail__back" onClick={() => navigate(-1)}>
-        <ArrowLeft aria-hidden="true" /> Back to students
+        <ArrowLeft aria-hidden="true" /> {t("studentDetail.backToStudents")}
       </button>
 
       <PageHeader
-        title={`Student #${studentId}`}
+        title={t("studentDetail.title", { id: studentId })}
         subtitle={
           latest
-            ? `Latest batch ${latest.access_code} · ${completedCount} completed`
-            : "No completed assessments yet"
+            ? t("studentDetail.latestBatch", {
+                code: latest.access_code,
+                count: completedCount,
+              })
+            : t("studentDetail.noCompleted")
         }
         actions={
           latestDiagnosis ? (
@@ -72,17 +77,28 @@ export function StudentDetailPage() {
             <span className="detail__stat-value">
               {latestScore != null ? `${latestScore}%` : "—"}
             </span>
-            <span className="detail__stat-label">Latest comprehension</span>
+            <span className="detail__stat-label">
+              {t("studentDetail.latestComprehension")}
+            </span>
           </div>
           <div className="detail__stat">
             <span className="detail__stat-value">{completedCount}</span>
-            <span className="detail__stat-label">Assessments completed</span>
+            <span className="detail__stat-label">
+              {t("studentDetail.assessmentsCompleted")}
+            </span>
           </div>
           <div className="detail__stat">
             <span className="detail__stat-value">
-              {latestDiagnosis ? diagnosisInfo(latestDiagnosis).label : "—"}
+              {latestDiagnosis
+                ? t(
+                    `diagnosis.${latestDiagnosis}`,
+                    diagnosisInfo(latestDiagnosis).label,
+                  )
+                : "—"}
             </span>
-            <span className="detail__stat-label">Latest diagnosis</span>
+            <span className="detail__stat-label">
+              {t("studentDetail.latestDiagnosis")}
+            </span>
           </div>
         </div>
       </div>
@@ -90,8 +106,8 @@ export function StudentDetailPage() {
       <section className="grid-2">
         <Card>
           <Card.Header
-            title="Assessment history"
-            subtitle="Completed reading assessments over time"
+            title={t("studentDetail.assessmentHistory")}
+            subtitle={t("studentDetail.assessmentHistorySub")}
           />
           <Card.Body>
             {history.length > 0 ? (
@@ -125,8 +141,8 @@ export function StudentDetailPage() {
               <EmptyState
                 variant="awaiting"
                 icon={History}
-                title="No history yet"
-                message="Completed assessments and progress over time appear here once this learner submits."
+                title={t("studentDetail.noHistory")}
+                message={t("studentDetail.noHistorySub")}
               />
             )}
           </Card.Body>
@@ -134,27 +150,32 @@ export function StudentDetailPage() {
 
         <Card>
           <Card.Header
-            title="Latest diagnosis"
+            title={t("studentDetail.latestDiagnosis")}
             action={
               <Badge tone="accent" icon={Target}>
-                Diagnosis
+                {t("studentDetail.diagnosis")}
               </Badge>
             }
           />
           <Card.Body>
             {latestDiagnosis ? (
               <p className="detail__recommendation">
-                The most recent evaluation places this learner at{" "}
-                <strong>{diagnosisInfo(latestDiagnosis).label}</strong> with a
-                comprehension score of{" "}
-                <strong>{latestScore != null ? `${latestScore}%` : "—"}</strong>.
-                Open the batch review to see per-question verdicts and the AI
-                recommendation.
+                <Trans
+                  i18nKey="studentDetail.recommendation"
+                  values={{
+                    level: t(
+                      `diagnosis.${latestDiagnosis}`,
+                      diagnosisInfo(latestDiagnosis).label,
+                    ),
+                    score: latestScore != null ? `${latestScore}%` : "—",
+                  }}
+                  components={{ 1: <strong />, 2: <strong /> }}
+                />
               </p>
             ) : (
               <EmptyState
-                title="Not evaluated yet"
-                message="A diagnosis appears after the learner completes an assessment and it is graded."
+                title={t("studentDetail.notEvaluated")}
+                message={t("studentDetail.notEvaluatedSub")}
               />
             )}
           </Card.Body>

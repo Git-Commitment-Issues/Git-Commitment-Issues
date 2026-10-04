@@ -1,5 +1,6 @@
 ﻿import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import {
   ArrowLeft,
   BookOpen,
@@ -42,6 +43,7 @@ import "./LearnerAssessmentPage.css"
  * own work.
  */
 export function LearnerAssessmentPage() {
+  const { t } = useTranslation()
   const { assessmentId } = useParams()
   const navigate = useNavigate()
   const { user, logout } = useSession()
@@ -65,7 +67,7 @@ export function LearnerAssessmentPage() {
     if (loading) {
       return (
         <Card>
-          <EmptyState title="Loading…" />
+          <EmptyState title={t("common.loading")} />
         </Card>
       )
     }
@@ -73,8 +75,8 @@ export function LearnerAssessmentPage() {
       return (
         <Card>
           <EmptyState
-            title="Assessment not found"
-            message="This assessment isn’t assigned to you."
+            title={t("learnerAssessment.notFound")}
+            message={t("learnerAssessment.notFoundSub")}
           />
         </Card>
       )
@@ -95,19 +97,24 @@ export function LearnerAssessmentPage() {
                   ? `${Math.round(Number(assessment.comprehension_score))}%`
                   : "—"}
               </span>
-              <span className="lresult__score-label">Comprehension score</span>
+              <span className="lresult__score-label">
+                {t("learnerAssessment.comprehensionScore")}
+              </span>
             </div>
             <div className="lresult__diag">
               {assessment.diagnosis ? (
                 <ProficiencyBadge level={diagnosisToLevel(assessment.diagnosis)} />
               ) : (
                 <Badge tone="primary" dot>
-                  Checking…
+                  {t("learner.checking")}
                 </Badge>
               )}
               {assessment.diagnosis ? (
                 <span className="lresult__diag-text">
-                  {diagnosisInfo(assessment.diagnosis).label}
+                  {t(
+                    `diagnosis.${assessment.diagnosis}`,
+                    diagnosisInfo(assessment.diagnosis).label,
+                  )}
                 </span>
               ) : null}
             </div>
@@ -120,13 +127,16 @@ export function LearnerAssessmentPage() {
                 <Sparkles aria-hidden="true" />
               </span>
               <div>
-                <h3 className="lresult__feedback-title">Feedback</h3>
+                <h3 className="lresult__feedback-title">
+                  {t("learnerAssessment.feedback")}
+                </h3>
                 {assessment.evaluation ? (
                   <p className="lresult__feedback-text">{assessment.evaluation}</p>
                 ) : null}
                 {assessment.recommendation ? (
                   <p className="lresult__feedback-text">
-                    <strong>Next step:</strong> {assessment.recommendation}
+                    <strong>{t("learnerAssessment.nextStep")}</strong>{" "}
+                    {assessment.recommendation}
                   </p>
                 ) : null}
               </div>
@@ -134,15 +144,15 @@ export function LearnerAssessmentPage() {
           ) : assessment.evaluation_error ? (
             <Card>
               <EmptyState
-                title="Still being checked"
-                message="Your teacher is reviewing this one. Check back soon."
+                title={t("learnerAssessment.stillChecking")}
+                message={t("learnerAssessment.stillCheckingSub")}
               />
             </Card>
           ) : null}
 
           {/* Passage */}
           <Card>
-            <Card.Header title="Passage" />
+            <Card.Header title={t("learnerAssessment.passage")} />
             <Card.Body>
               <p className="lresult__passage">{assessment.passage_text}</p>
             </Card.Body>
@@ -150,7 +160,11 @@ export function LearnerAssessmentPage() {
 
           {/* Per-question results */}
           <Card>
-            <Card.Header title={`Your answers (${questionRows.length})`} />
+            <Card.Header
+              title={t("learnerAssessment.yourAnswers", {
+                count: questionRows.length,
+              })}
+            />
             <Card.Body>
               <ol className="lresult__questions">
                 {questionRows.map((q, i) => {
@@ -158,24 +172,30 @@ export function LearnerAssessmentPage() {
                   return (
                     <li key={q.id} className="lresult__q">
                       <div className="lresult__q-head">
-                        <span className="lresult__q-num">Question {i + 1}</span>
-                        <Badge tone="neutral">{skillLabel(q.skill)}</Badge>
+                        <span className="lresult__q-num">
+                          {t("learnerAssessment.question", { number: i + 1 })}
+                        </span>
+                        <Badge tone="neutral">
+                          {t(`skills.${q.skill}`, skillLabel(q.skill))}
+                        </Badge>
                         {verdict ? <VerdictBadge verdict={verdict} /> : null}
                       </div>
                       <p className="lresult__q-text">{q.question_text}</p>
                       <p className="lresult__answer">
                         {q.answer_text
                           ? `“${q.answer_text}”`
-                          : "No answer given."}
+                          : t("learnerAssessment.noAnswer")}
                       </p>
                       {q.evidence ? (
                         <p className="lresult__evidence">
-                          Evidence from the passage: {q.evidence}
+                          {t("learnerAssessment.evidence", { evidence: q.evidence })}
                         </p>
                       ) : null}
                       {q.override_note ? (
                         <p className="lresult__note">
-                          Teacher note: {q.override_note}
+                          {t("learnerAssessment.teacherNote", {
+                            note: q.override_note,
+                          })}
                         </p>
                       ) : null}
                     </li>
@@ -200,7 +220,7 @@ export function LearnerAssessmentPage() {
                   }
                 }}
               >
-                Got it — mark feedback as seen
+                {t("learnerAssessment.markSeen")}
               </Button>
             </div>
           ) : null}
@@ -214,7 +234,7 @@ export function LearnerAssessmentPage() {
     const onSubmit = async () => {
       setError(null)
       if (!allAnswered) {
-        setError("Answer every question before submitting.")
+        setError(t("learnerAssessment.answerEvery"))
         return
       }
       setSubmitting(true)
@@ -233,7 +253,7 @@ export function LearnerAssessmentPage() {
         setSubmitted(true)
         reload()
       } catch {
-        setError("Couldn’t submit. Check your connection and try again.")
+        setError(t("learnerAssessment.submitError"))
       } finally {
         setSubmitting(false)
       }
@@ -244,7 +264,9 @@ export function LearnerAssessmentPage() {
         <Card>
           <div className="lresult__passage-head">
             <BookOpen aria-hidden="true" />
-            <h2 className="lresult__passage-title">Read the passage</h2>
+            <h2 className="lresult__passage-title">
+              {t("learnerAssessment.readPassage")}
+            </h2>
           </div>
           <Card.Body>
             <p className="lresult__passage">{assessment.passage_text}</p>
@@ -256,15 +278,19 @@ export function LearnerAssessmentPage() {
             <li key={q.id}>
               <Card>
                 <div className="lresult__q-head">
-                  <span className="lresult__q-num">Question {i + 1}</span>
-                  <Badge tone="neutral">{skillLabel(q.skill)}</Badge>
+                  <span className="lresult__q-num">
+                    {t("learnerAssessment.question", { number: i + 1 })}
+                  </span>
+                  <Badge tone="neutral">
+                    {t(`skills.${q.skill}`, skillLabel(q.skill))}
+                  </Badge>
                 </div>
                 <p className="lresult__q-text">{q.question_text}</p>
                 <textarea
                   className="lresult__input"
                   rows={4}
-                  placeholder="Type your answer…"
-                  aria-label={`Answer to question ${i + 1}`}
+                  placeholder={t("learnerAssessment.typeAnswer")}
+                  aria-label={t("learnerAssessment.answerLabel", { number: i + 1 })}
                   value={answers[q.id] ?? ""}
                   onChange={(e) =>
                     setAnswers((a) => ({ ...a, [q.id]: e.target.value }))
@@ -287,7 +313,9 @@ export function LearnerAssessmentPage() {
             onClick={onSubmit}
             disabled={!allAnswered || submitting}
           >
-            {submitting ? "Submitting…" : "Submit answers"}
+            {submitting
+              ? t("learnerAssessment.submitting")
+              : t("learnerAssessment.submitAnswers")}
           </Button>
         </div>
       </div>
@@ -299,15 +327,15 @@ export function LearnerAssessmentPage() {
       <div className="stack">
         <button
           type="button"
-          className="detail__back"
+          className="lresult__back"
           onClick={() => navigate("/")}
         >
-          <ArrowLeft aria-hidden="true" /> Back to my assessments
+          <ArrowLeft aria-hidden="true" /> {t("learnerAssessment.backToMyAssessments")}
         </button>
 
         <PageHeader
-          eyebrow="Assessment"
-          title={assessment?.title ?? "Assessment"}
+          eyebrow={t("learnerAssessment.assessment")}
+          title={assessment?.title ?? t("learnerAssessment.assessment")}
         />
 
         {body}

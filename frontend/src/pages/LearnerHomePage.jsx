@@ -1,8 +1,9 @@
 ﻿import { Link } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { BookOpen, Bell, CheckCircle2, Clock } from "lucide-react"
 import { Logo } from "@/components/brand/Logo"
 import { Mascot } from "@/components/brand/Mascot"
-import { ThemeToggle } from "@/components/layout"
+import { ThemeToggle, LanguageToggle } from "@/components/layout"
 import { Card, Badge, Button, ProficiencyBadge, EmptyState } from "@/components/ui"
 import { useSession } from "@/session/useSession"
 import { useAsync } from "@/hooks/useAsync"
@@ -16,15 +17,17 @@ import "./LearnerHomePage.css"
  * learner can only ever reach their own assessments and feedback.
  */
 function LearnerShell({ userName, onLogout, children }) {
+  const { t } = useTranslation()
   return (
     <div className="learner">
       <header className="learner__bar">
         <Logo />
         <div className="learner__bar-right">
           <span className="learner__who">{userName}</span>
+          <LanguageToggle />
           <ThemeToggle />
           <Button variant="ghost" onClick={onLogout}>
-            Sign out
+            {t("learner.signOut")}
           </Button>
         </div>
       </header>
@@ -37,6 +40,7 @@ function LearnerShell({ userName, onLogout, children }) {
 
 /** One assessment row in the learner's list. */
 function AssessmentRow({ item }) {
+  const { t } = useTranslation()
   const a = item.assessment
   const status = statusInfo(a.status)
   const scored = a.comprehension_score != null
@@ -53,7 +57,7 @@ function AssessmentRow({ item }) {
         <span className="learner-row__status">
           {item.has_correction_alert ? (
             <Badge tone="accent" icon={Bell}>
-              New feedback
+              {t("learner.newFeedback")}
             </Badge>
           ) : null}
           {a.status === "completed" ? (
@@ -61,12 +65,12 @@ function AssessmentRow({ item }) {
               <ProficiencyBadge level={diagnosisToLevel(a.diagnosis)} />
             ) : (
               <Badge tone="primary" dot>
-                Checking…
+                {t("learner.checking")}
               </Badge>
             )
           ) : (
             <Badge tone={status.tone} dot>
-              {status.label}
+              {t(`status.${a.status}`, status.label)}
             </Badge>
           )}
         </span>
@@ -82,6 +86,7 @@ function AssessmentRow({ item }) {
  * no class dashboard, roster, or authoring tools.
  */
 export function LearnerHomePage() {
+  const { t } = useTranslation()
   const { user, logout } = useSession()
   const { data, loading } = useAsync(() => repository.listMyAssessments(), [])
 
@@ -90,18 +95,17 @@ export function LearnerHomePage() {
   const alert = data?.alert ?? false
 
   return (
-    <LearnerShell userName={user?.name ?? "Learner"} onLogout={logout}>
+    <LearnerShell userName={user?.name ?? t("learner.defaultName")} onLogout={logout}>
       <div className="stack">
         <header className="learner__header">
           <div className="learner__header-text">
             <p className="learner__eyebrow">
-              Welcome{user?.name ? `, ${user.name}` : ""}
+              {user?.name
+                ? t("learner.welcome", { name: user.name })
+                : t("learner.welcomeNoName")}
             </p>
-            <h1 className="learner__title">Your assessments</h1>
-            <p className="learner__subtitle">
-              Take the reading checks assigned to you, then review your results
-              and your teacher’s feedback.
-            </p>
+            <h1 className="learner__title">{t("learner.yourAssessments")}</h1>
+            <p className="learner__subtitle">{t("learner.yourAssessmentsSub")}</p>
           </div>
           <Mascot
             variant="star"
@@ -114,18 +118,25 @@ export function LearnerHomePage() {
         {alert ? (
           <Card raised className="learner__alert">
             <Bell aria-hidden="true" />
-            <span>Your teacher left new feedback on one of your assessments.</span>
+            <span>{t("learner.newFeedbackBanner")}</span>
           </Card>
         ) : null}
 
         <Card>
           <Card.Header
-            title="To do"
-            subtitle="Assessments assigned to you that aren’t finished yet"
+            title={
+              <span className="learner-section__title">
+                <span className="learner-section__title-icon learner-section__title-icon--todo">
+                  <Clock aria-hidden="true" />
+                </span>
+                {t("learner.toDo")}
+              </span>
+            }
+            subtitle={t("learner.toDoSub")}
           />
           <Card.Body>
             {loading ? (
-              <EmptyState title="Loading…" />
+              <EmptyState title={t("common.loading")} />
             ) : upcoming.length > 0 ? (
               <ul className="row-list">
                 {upcoming.map((item) => (
@@ -135,8 +146,8 @@ export function LearnerHomePage() {
             ) : (
               <EmptyState
                 icon={CheckCircle2}
-                title="All caught up"
-                message="You have no assessments waiting right now."
+                title={t("learner.allCaughtUp")}
+                message={t("learner.allCaughtUpSub")}
               />
             )}
           </Card.Body>
@@ -144,12 +155,19 @@ export function LearnerHomePage() {
 
         <Card>
           <Card.Header
-            title="Completed"
-            subtitle="Your previous assessments and results"
+            title={
+              <span className="learner-section__title">
+                <span className="learner-section__title-icon learner-section__title-icon--done">
+                  <CheckCircle2 aria-hidden="true" />
+                </span>
+                {t("learner.completed")}
+              </span>
+            }
+            subtitle={t("learner.completedSub")}
           />
           <Card.Body>
             {loading ? (
-              <EmptyState title="Loading…" />
+              <EmptyState title={t("common.loading")} />
             ) : previous.length > 0 ? (
               <ul className="row-list">
                 {previous.map((item) => (
@@ -159,8 +177,8 @@ export function LearnerHomePage() {
             ) : (
               <EmptyState
                 icon={BookOpen}
-                title="Nothing completed yet"
-                message="Once you finish an assessment, your results appear here."
+                title={t("learner.nothingCompleted")}
+                message={t("learner.nothingCompletedSub")}
               />
             )}
           </Card.Body>

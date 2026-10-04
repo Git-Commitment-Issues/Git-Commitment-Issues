@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Badge } from './Badge'
 import { PROFICIENCY } from './proficiency'
 
@@ -6,16 +7,19 @@ import { PROFICIENCY } from './proficiency'
  *
  * The AI assessment reports a level per comprehension skill (Main Idea,
  * Inference, Vocabulary in Context, etc). This maps each level to a consistent
- * tone + icon so proficiency reads the same everywhere in the app.
+ * tone + icon so proficiency reads the same everywhere in the app. The label is
+ * localized, falling back to the English taxonomy label.
  *
  * Props:
  *   level: 'proficient' | 'developing' | 'needs-practice'
  */
 export function ProficiencyBadge({ level = 'developing', ...props }) {
-  const config = PROFICIENCY[level] ?? PROFICIENCY.developing
+  const { t } = useTranslation()
+  const key = PROFICIENCY[level] ? level : 'developing'
+  const config = PROFICIENCY[key]
   return (
     <Badge tone={config.tone} icon={config.icon} {...props}>
-      {config.label}
+      {t(`proficiency.${key}`, config.label)}
     </Badge>
   )
 }

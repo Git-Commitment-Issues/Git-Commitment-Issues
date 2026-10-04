@@ -13,27 +13,27 @@ import {
 export const NAV_ITEMS = [
   {
     to: '/',
-    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
+    descriptionKey: 'nav.dashboardSub',
     icon: LayoutDashboard,
-    description: 'Class reading-comprehension overview',
     end: true,
   },
   {
     to: '/students',
-    label: 'Students',
+    labelKey: 'nav.students',
+    descriptionKey: 'nav.studentsSub',
     icon: Users,
-    description: 'Roster and per-student progress',
   },
   {
     to: '/assessments',
-    label: 'Assessments',
+    labelKey: 'nav.assessments',
+    descriptionKey: 'nav.assessmentsSub',
     icon: ClipboardList,
-    description: 'Create and manage reading assessments',
   },
   {
     to: '/settings',
-    label: 'Settings',
+    labelKey: 'nav.settings',
+    descriptionKey: 'nav.settingsSub',
     icon: Settings,
-    description: 'Account and class preferences',
   },
 ]

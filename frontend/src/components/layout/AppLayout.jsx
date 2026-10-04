@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ClassroomProvider } from "@/session/ClassroomProvider"
 import { useSession } from "@/session/useSession"
 import { Sidebar } from "./Sidebar"
@@ -20,6 +21,7 @@ const PLACEHOLDER_USER = {
  * the active route via the direction-aware <PageTransition /> (new design).
  */
 export function AppLayout() {
+  const { t } = useTranslation()
   const { user } = useSession()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -37,7 +39,7 @@ export function AppLayout() {
   // Use the signed-in user when available; otherwise fall back to the
   // placeholder so the shell still renders a label.
   const topbarUser = user
-    ? { name: user.name, role: "Teacher" }
+    ? { name: user.name, role: t("roles.teacher") }
     : PLACEHOLDER_USER
 
   return (

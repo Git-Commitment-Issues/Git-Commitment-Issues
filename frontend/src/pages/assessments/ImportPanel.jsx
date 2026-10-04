@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Camera, Loader2, Check } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { recognize, warmUpOcr, terminateOcr } from '@/ocr/ocrEngine'
@@ -17,6 +18,7 @@ import './ImportPanel.css'
  *   onApply({ passage_text }) - receives the corrected passage text.
  */
 export function ImportPanel({ onApply }) {
+  const { t } = useTranslation()
   const inputRef = useRef(null)
   const [isScanning, setIsScanning] = useState(false)
   const [progress, setProgress] = useState(0) // 0..1
@@ -67,12 +69,10 @@ export function ImportPanel({ onApply }) {
       setText(result.text || '')
       setOcrWords(result.words || [])
       if (!result.text || !result.text.trim()) {
-        setError(
-          'We couldn’t read any text. Try a clearer, well-lit photo of the page.',
-        )
+        setError(t('importPanel.errorNoText'))
       }
     } catch {
-      setError('Something went wrong reading that photo. Please try another image.')
+      setError(t('importPanel.errorGeneric'))
     } finally {
       setIsScanning(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -92,11 +92,8 @@ export function ImportPanel({ onApply }) {
   return (
     <Card className="import-panel">
       <div className="import-panel__head">
-        <h3 className="import-panel__title">Scan a printed page</h3>
-        <p className="import-panel__subtitle">
-          Photograph a book page or document. The text is read on your device —
-          no upload, no AI cost.
-        </p>
+        <h3 className="import-panel__title">{t('importPanel.title')}</h3>
+        <p className="import-panel__subtitle">{t('importPanel.subtitle')}</p>
       </div>
 
       <input
@@ -116,7 +113,7 @@ export function ImportPanel({ onApply }) {
         onClick={() => inputRef.current && inputRef.current.click()}
         disabled={isScanning}
       >
-        {isScanning ? 'Reading page…' : 'Snap or upload a page'}
+        {isScanning ? t('importPanel.reading') : t('importPanel.snap')}
       </Button>
 
       {isScanning && (
@@ -126,7 +123,7 @@ export function ImportPanel({ onApply }) {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={percent}
-          aria-label="Reading page progress"
+          aria-label={t('importPanel.progressLabel')}
         >
           <div
             className="import-panel__progress-bar"
@@ -147,7 +144,7 @@ export function ImportPanel({ onApply }) {
           {lowConfidenceWords.length > 0 && (
             <div className="import-panel__flags">
               <span className="import-panel__flags-label">
-                Words to double-check:
+                {t('importPanel.wordsToCheck')}
               </span>
               <ul className="import-panel__flags-list">
                 {lowConfidenceWords.map((word, index) => (
@@ -160,7 +157,7 @@ export function ImportPanel({ onApply }) {
           )}
 
           <label htmlFor="import-panel-text" className="import-panel__label">
-            Extracted passage — fix any mistakes before using it
+            {t('importPanel.extractedLabel')}
           </label>
           <textarea
             id="import-panel-text"
@@ -181,7 +178,9 @@ export function ImportPanel({ onApply }) {
               onClick={handleApply}
               disabled={!hasText}
             >
-              {applied ? 'Passage added' : 'Use this passage'}
+              {applied
+                ? t('importPanel.passageAdded')
+                : t('importPanel.useThisPassage')}
             </Button>
           </div>
         </>

@@ -1,4 +1,5 @@
 ﻿import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Users,
   Gauge,
@@ -30,6 +31,7 @@ import './DashboardPage.css'
  * so nothing is fabricated.
  */
 export function DashboardPage() {
+  const { t } = useTranslation()
   const { user } = useSession()
   const { activeClassroom, loading: classroomLoading } = useClassroom()
   const classroomId = activeClassroom?.id ?? null
@@ -71,7 +73,7 @@ export function DashboardPage() {
 
   // Per-skill chart data from the backend breakdown.
   const skillChartData = skillRows.map((s) => ({
-    label: skillLabel(s.skill),
+    label: t(`skills.${s.skill}`, skillLabel(s.skill)),
     score: Math.round(Number(s.avg_score ?? 0)),
   }))
 
@@ -89,9 +91,17 @@ export function DashboardPage() {
   const proficiencyData =
     rosterSize > 0
       ? [
-          { name: 'On track', value: onTrackCount, tone: 'success' },
-          { name: 'Comprehension barrier', value: barrierCount, tone: 'primary' },
-          { name: 'Highest priority', value: priorityCount, tone: 'error' },
+          { name: t('dashboard.onTrack'), value: onTrackCount, tone: 'success' },
+          {
+            name: t('dashboard.comprehensionBarrier'),
+            value: barrierCount,
+            tone: 'primary',
+          },
+          {
+            name: t('dashboard.highestPriority'),
+            value: priorityCount,
+            tone: 'error',
+          },
         ].filter((d) => d.value > 0)
       : []
 
@@ -103,24 +113,24 @@ export function DashboardPage() {
           empty space on the right of the heading. */}
       <Card raised className="dashboard__welcome">
         <div className="dashboard__welcome-text">
-          <p className="dashboard__welcome-eyebrow">Welcome back</p>
+          <p className="dashboard__welcome-eyebrow">{t('dashboard.welcomeEyebrow')}</p>
           <h2 className="dashboard__welcome-title">
-            {displayName ? `Hi, ${displayName}!` : 'Hi there!'}
+            {displayName
+              ? t('dashboard.welcomeHi', { name: displayName })
+              : t('dashboard.welcomeHiThere')}
           </h2>
-          <p className="dashboard__welcome-sub">
-            Here’s how your class is doing today.
-          </p>
+          <p className="dashboard__welcome-sub">{t('dashboard.welcomeSub')}</p>
         </div>
         <Mascot variant="welcome" size="md" float className="dashboard__welcome-mascot" />
       </Card>
 
       <PageHeader
-        eyebrow={activeClassroom?.name ?? 'Class overview'}
-        title="Class overview"
-        subtitle="A focused read on how your class is comprehending — and who may need a closer look this week."
+        eyebrow={activeClassroom?.name ?? t('dashboard.classOverview')}
+        title={t('dashboard.classOverview')}
+        subtitle={t('dashboard.classOverviewSub')}
         actions={
           <Button icon={ClipboardList} variant="primary">
-            <Link to="/assessments/new">New assessment</Link>
+            <Link to="/assessments/new">{t('dashboard.newAssessment')}</Link>
           </Button>
         }
       />
@@ -128,48 +138,48 @@ export function DashboardPage() {
       {!classroomId && !classroomLoading ? (
         <Card>
           <EmptyState
-            title="No classroom selected"
-            message="Create or select a classroom to see its reading-comprehension overview."
+            title={t('dashboard.noClassroom')}
+            message={t('dashboard.noClassroomSub')}
           />
         </Card>
       ) : null}
 
-      <section className="grid-stats" aria-label="Class summary">
+      <section className="grid-stats" aria-label={t('dashboard.classOverview')}>
         <StatCard
           icon={Users}
           tone="primary"
-          label="Completed assessments"
+          label={t('dashboard.completedAssessments')}
           value={isLoading ? '—' : completedCount}
-          hint={`of ${totalAssessments} assigned`}
+          hint={t('dashboard.ofAssigned', { count: totalAssessments })}
         />
         <StatCard
           icon={Gauge}
           tone="accent"
-          label="Class average"
+          label={t('dashboard.classAverage')}
           value={isLoading || classAverage == null ? '—' : `${classAverage}%`}
-          hint="Across comprehension skills"
+          hint={t('dashboard.acrossSkills')}
         />
         <StatCard
           icon={LifeBuoy}
           tone="error"
-          label="May need support"
+          label={t('dashboard.mayNeedSupport')}
           value={isLoading ? '—' : needHelpRows.length}
-          hint="Flagged by AI analysis"
+          hint={t('dashboard.flaggedByAi')}
         />
         <StatCard
           icon={ClipboardList}
           tone="success"
-          label="Batches"
+          label={t('dashboard.batches')}
           value={isLoading ? '—' : batches.length}
-          hint="Scheduled for this class"
+          hint={t('dashboard.scheduledForClass')}
         />
       </section>
 
       <section className="grid-2">
         <Card>
           <Card.Header
-            title="Comprehension by skill"
-            subtitle="Class average across the reading-comprehension skills"
+            title={t('dashboard.comprehensionBySkill')}
+            subtitle={t('dashboard.comprehensionBySkillSub')}
           />
           <Card.Body>
             {skillChartData.length > 0 ? (
@@ -178,12 +188,8 @@ export function DashboardPage() {
               </ChartReveal>
             ) : (
               <EmptyState
-                title={isLoading ? 'Loading…' : 'No results yet'}
-                message={
-                  isLoading
-                    ? ''
-                    : 'Skill averages appear once a batch has graded submissions.'
-                }
+                title={isLoading ? t('common.loading') : t('dashboard.noResultsYet')}
+                message={isLoading ? '' : t('dashboard.noResultsSkill')}
               />
             )}
           </Card.Body>
@@ -191,8 +197,8 @@ export function DashboardPage() {
 
         <Card>
           <Card.Header
-            title="Proficiency mix"
-            subtitle="Where learners sit right now"
+            title={t('dashboard.proficiencyMix')}
+            subtitle={t('dashboard.proficiencyMixSub')}
           />
           <Card.Body>
             {proficiencyData.length > 0 ? (
@@ -201,12 +207,8 @@ export function DashboardPage() {
               </ChartReveal>
             ) : (
               <EmptyState
-                title={isLoading ? 'Loading…' : 'No learners yet'}
-                message={
-                  isLoading
-                    ? ''
-                    : 'The proficiency mix appears once this classroom has learners and graded results.'
-                }
+                title={isLoading ? t('common.loading') : t('dashboard.noLearnersYet')}
+                message={isLoading ? '' : t('dashboard.noLearnersMix')}
               />
             )}
           </Card.Body>
@@ -215,11 +217,11 @@ export function DashboardPage() {
 
       <Card>
         <Card.Header
-          title="Needs a closer look"
-          subtitle="Lowest overall comprehension"
+          title={t('dashboard.needsCloserLook')}
+          subtitle={t('dashboard.lowestComprehension')}
           action={
             <Link to="/students" className="text-link">
-              All students
+              {t('common.allStudents')}
               <ArrowUpRight aria-hidden="true" />
             </Link>
           }
@@ -251,12 +253,8 @@ export function DashboardPage() {
             </ul>
           ) : (
             <EmptyState
-              title={isLoading ? 'Loading…' : 'Everyone on track'}
-              message={
-                isLoading
-                  ? ''
-                  : 'No learners are currently flagged for support in the latest batch.'
-              }
+              title={isLoading ? t('common.loading') : t('dashboard.everyoneOnTrack')}
+              message={isLoading ? '' : t('dashboard.everyoneOnTrackSub')}
             />
           )}
         </Card.Body>
@@ -265,8 +263,8 @@ export function DashboardPage() {
       {error ? (
         <Card>
           <EmptyState
-            title="Couldn’t load the dashboard"
-            message="There was a problem reaching the server. Try again shortly."
+            title={t('dashboard.loadError')}
+            message={t('dashboard.loadErrorSub')}
           />
         </Card>
       ) : null}

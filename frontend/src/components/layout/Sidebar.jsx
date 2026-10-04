@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import { PanelLeftClose, X, GraduationCap } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { PanelLeftClose, X, QrCode } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
 import { NAV_ITEMS } from '@/config/navigation'
 import { cn } from '@/lib/cn'
@@ -24,6 +25,7 @@ export function Sidebar({
   onToggleCollapse,
   onCloseMobile,
 }) {
+  const { t } = useTranslation()
   return (
     <aside
       className={cn(
@@ -40,8 +42,8 @@ export function Sidebar({
           type="button"
           className="sidebar__collapse"
           onClick={onToggleCollapse}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
+          title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
         >
           <PanelLeftClose className="sidebar__collapse-icon" aria-hidden="true" />
         </button>
@@ -50,7 +52,7 @@ export function Sidebar({
           type="button"
           className="sidebar__close"
           onClick={onCloseMobile}
-          aria-label="Close navigation"
+          aria-label={t('topbar.closeNav')}
         >
           <X aria-hidden="true" />
         </button>
@@ -58,38 +60,41 @@ export function Sidebar({
 
       <nav className="sidebar__nav">
         <ul className="sidebar__list">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, description, end }) => (
-            <li key={to}>
-              <NavLink
-                to={to}
-                end={end}
-                onClick={onCloseMobile}
-                title={collapsed ? label : undefined}
-                className={({ isActive }) =>
-                  cn('sidebar__link', isActive && 'sidebar__link--active')
-                }
-              >
-                <Icon className="sidebar__link-icon" aria-hidden="true" />
-                <span className="sidebar__link-label">{label}</span>
-                <span className="sidebar__link-desc">{description}</span>
-              </NavLink>
-            </li>
-          ))}
+          {NAV_ITEMS.map(({ to, labelKey, icon: Icon, descriptionKey, end }) => {
+            const label = t(labelKey)
+            return (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  end={end}
+                  onClick={onCloseMobile}
+                  title={collapsed ? label : undefined}
+                  className={({ isActive }) =>
+                    cn('sidebar__link', isActive && 'sidebar__link--active')
+                  }
+                >
+                  <Icon className="sidebar__link-icon" aria-hidden="true" />
+                  <span className="sidebar__link-label">{label}</span>
+                  <span className="sidebar__link-desc">{t(descriptionKey)}</span>
+                </NavLink>
+              </li>
+            )
+          })}
         </ul>
       </nav>
 
       <div className="sidebar__foot">
-        {/* Opens the public student view in a new tab (for preview / demo). */}
-        <a
+        {/* Takes teachers to the real assessment QR generator. Students scan
+            the generated code and enter their existing LRN to continue. */}
+        <NavLink
           className="sidebar__help"
-          href="/s"
-          target="_blank"
-          rel="noreferrer"
-          title="Open the student view"
+          to="/assessments"
+          onClick={onCloseMobile}
+          title={t('nav.generateStudentQr')}
         >
-          <GraduationCap className="sidebar__link-icon" aria-hidden="true" />
-          <span className="sidebar__link-label">Student view</span>
-        </a>
+          <QrCode className="sidebar__link-icon" aria-hidden="true" />
+          <span className="sidebar__link-label">{t('nav.generateStudentQr')}</span>
+        </NavLink>
       </div>
     </aside>
   )

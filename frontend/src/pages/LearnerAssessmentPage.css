@@ -1,6 +1,31 @@
 ﻿/* LearnerAssessmentPage — a learner taking or reviewing one of their own
    assessments. Shared design tokens only. */
 
+/* Back link — a self-contained inline arrow + label, left-aligned. Its own
+   style so it doesn't depend on another page's stylesheet being loaded. */
+.lresult__back {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-2);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.lresult__back:hover {
+  color: var(--color-primary);
+}
+.lresult__back svg {
+  width: 16px;
+  height: 16px;
+}
+
 .lresult__summary {
   display: flex;
   align-items: center;

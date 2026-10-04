@@ -1,4 +1,5 @@
 ﻿import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { User, Hash } from "lucide-react"
 import { Card, Input, Button } from "@/components/ui"
 import { Logo } from "@/components/brand/Logo"
@@ -17,6 +18,7 @@ import "./LoginPage.css"
  * shared design tokens — it introduces no new visual language.
  */
 export function LoginPage() {
+  const { t } = useTranslation()
   const { login } = useSession()
   const [mode, setMode] = useState("teacher") // "teacher" | "learner"
   const [name, setName] = useState("")
@@ -41,13 +43,13 @@ export function LoginPage() {
       if (err instanceof ApiError && err.status === 401) {
         setError(
           mode === "teacher"
-            ? "No teacher found with that name."
-            : "No active learner found with that LRN.",
+            ? t("login.errorNoTeacher")
+            : t("login.errorNoLearner"),
         )
       } else if (err instanceof ApiError && err.status === 400) {
-        setError("Please enter your credentials.")
+        setError(t("login.errorNoCredentials"))
       } else {
-        setError("Couldn’t sign in. Check your connection and try again.")
+        setError(t("login.errorSignIn"))
       }
     } finally {
       setSubmitting(false)
@@ -62,12 +64,10 @@ export function LoginPage() {
           <h1 className="login__title">
             pahina<span className="login__title-accent">.</span>
           </h1>
-          <p className="login__subtitle">
-            Reading-comprehension screening for teachers and learners.
-          </p>
+          <p className="login__subtitle">{t("login.subtitle")}</p>
         </div>
 
-        <div className="login__tabs" role="tablist" aria-label="Sign in as">
+        <div className="login__tabs" role="tablist" aria-label={t("login.signInAs")}>
           <button
             type="button"
             role="tab"
@@ -78,7 +78,7 @@ export function LoginPage() {
               setError("")
             }}
           >
-            Teacher
+            {t("login.teacher")}
           </button>
           <button
             type="button"
@@ -90,28 +90,28 @@ export function LoginPage() {
               setError("")
             }}
           >
-            Learner
+            {t("login.learner")}
           </button>
         </div>
 
         <form className="login__form" onSubmit={handleSubmit}>
           {mode === "teacher" ? (
             <Input
-              label="Teacher name"
+              label={t("login.teacherName")}
               icon={User}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Ms. Reyes"
+              placeholder={t("login.teacherNamePlaceholder")}
               autoFocus
               required
             />
           ) : (
             <Input
-              label="Learner Reference Number"
+              label={t("login.lrnLabel")}
               icon={Hash}
               value={lrn}
               onChange={(e) => setLrn(e.target.value)}
-              placeholder="12-digit LRN"
+              placeholder={t("login.lrnPlaceholder")}
               inputMode="numeric"
               autoFocus
               required
@@ -130,18 +130,18 @@ export function LoginPage() {
             disabled={submitting}
             className="login__submit"
           >
-            {submitting ? "Signing in…" : "Sign in"}
+            {submitting ? t("login.signingIn") : t("login.signIn")}
           </Button>
         </form>
 
         <p className="login__foot">
-          Don’t have an account?{" "}
+          {t("login.noAccount")}{" "}
           <button
             type="button"
             className="login__link"
             onClick={() => setShowRegister(true)}
           >
-            Create one
+            {t("login.createOne")}
           </button>
         </p>
       </Card>

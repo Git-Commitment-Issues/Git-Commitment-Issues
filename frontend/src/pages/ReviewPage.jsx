@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, BookOpen, Sparkles, Check, PencilLine } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
 import {
@@ -20,12 +21,13 @@ import {
 import './ReviewPage.css'
 
 /**
- * ReviewPage â€” teacher review & corrections (spec module 6). For each question
+ * ReviewPage — teacher review & corrections (spec module 6). For each question
  * the teacher sees the learner's answer, the AI verdict + evidence (empty until
  * the backend produces them), and can override the verdict with an optional
  * note. Final verdict = COALESCE(teacher_override, ai_verdict).
  */
 export function ReviewPage() {
+  const { t } = useTranslation()
   const { code } = useParams()
   const { data, loading, reload } = useAsync(
     () => repository.getAssessmentByCode(code),
@@ -36,10 +38,10 @@ export function ReviewPage() {
     return (
       <div className="stack">
         <Link to="/assessments" className="detail__back">
-          <ArrowLeft aria-hidden="true" /> Back
+          <ArrowLeft aria-hidden="true" /> {t('review.back')}
         </Link>
         <Card>
-          <div className="review__loading">Loadingâ€¦</div>
+          <div className="review__loading">{t('common.loading')}</div>
         </Card>
       </div>
     )
@@ -49,10 +51,10 @@ export function ReviewPage() {
     return (
       <div className="stack">
         <Link to="/assessments" className="detail__back">
-          <ArrowLeft aria-hidden="true" /> Back
+          <ArrowLeft aria-hidden="true" /> {t('review.back')}
         </Link>
         <Card>
-          <EmptyState title="Assessment not found" />
+          <EmptyState title={t('review.notFound')} />
         </Card>
       </div>
     )
@@ -64,20 +66,20 @@ export function ReviewPage() {
   return (
     <div className="stack">
       <Link to={`/assessments/${assessment.access_code}`} className="detail__back">
-        <ArrowLeft aria-hidden="true" /> Back to assessment
+        <ArrowLeft aria-hidden="true" /> {t('review.backToAssessment')}
       </Link>
 
       <PageHeader
-        eyebrow="Review &amp; corrections"
+        eyebrow={t('review.eyebrow')}
         title={assessment.title}
-        subtitle="Check each answer against the passage. The AI verdict appears once the backend grades it; your override always wins."
+        subtitle={t('review.subtitle')}
       />
 
       {/* Passage reference */}
       <Card>
         <div className="review__passage-head">
           <BookOpen aria-hidden="true" />
-          <h2 className="review__passage-title">Passage</h2>
+          <h2 className="review__passage-title">{t('review.passage')}</h2>
         </div>
         <p className="review__passage">{assessment.passage_text}</p>
       </Card>
@@ -87,8 +89,8 @@ export function ReviewPage() {
           <EmptyState
             variant="awaiting"
             icon={Sparkles}
-            title="No submission yet"
-            message="This learner hasnâ€™t submitted. Once they do, their answers appear here for review."
+            title={t('review.noSubmission')}
+            message={t('review.noSubmissionSub')}
           />
         </Card>
       ) : (
@@ -112,6 +114,7 @@ export function ReviewPage() {
 /* -------------------------------------------------------------------------- */
 
 function AnswerReview({ index, answer, onSaved }) {
+  const { t } = useTranslation()
   const [note, setNote] = useState(answer.override_note ?? '')
   const [saving, setSaving] = useState(null) // the verdict being saved
   const current = finalVerdict(answer)
@@ -132,11 +135,15 @@ function AnswerReview({ index, answer, onSaved }) {
   return (
     <Card>
       <div className="review__q-head">
-        <span className="review__q-num">Question {index + 1}</span>
-        <Badge tone="neutral">{skillLabel(answer.skill)}</Badge>
+        <span className="review__q-num">
+          {t('review.question', { number: index + 1 })}
+        </span>
+        <Badge tone="neutral">
+          {t(`skills.${answer.skill}`, skillLabel(answer.skill))}
+        </Badge>
         {current ? (
           <span className="review__final">
-            Final: <VerdictBadge verdict={current} />
+            {t('review.final')} <VerdictBadge verdict={current} />
           </span>
         ) : null}
       </div>
@@ -145,41 +152,41 @@ function AnswerReview({ index, answer, onSaved }) {
 
       {answer.expected_ideas ? (
         <p className="review__expected">
-          Expected ideas: {answer.expected_ideas}
+          {t('review.expectedIdeas', { ideas: answer.expected_ideas })}
         </p>
       ) : null}
 
       {/* Learner's answer */}
       <div className="review__block">
-        <span className="review__block-label">Learnerâ€™s answer</span>
+        <span className="review__block-label">{t('review.learnerAnswer')}</span>
         <p className="review__answer-text">
-          {answer.answer_text ? `â€œ${answer.answer_text}â€` : 'No answer given.'}
+          {answer.answer_text ? `“${answer.answer_text}”` : t('review.noAnswer')}
         </p>
       </div>
 
-      {/* AI verdict + evidence â€” empty until the backend produces them */}
+      {/* AI verdict + evidence — empty until the backend produces them */}
       <div className="review__block">
         <span className="review__block-label">
-          <Sparkles aria-hidden="true" /> AI assessment
+          <Sparkles aria-hidden="true" /> {t('review.aiAssessment')}
         </span>
         {answer.ai_verdict ? (
           <div className="review__ai">
             <VerdictBadge verdict={answer.ai_verdict} />
             {answer.evidence ? (
-              <p className="review__evidence">Evidence: {answer.evidence}</p>
+              <p className="review__evidence">
+                {t('review.aiEvidence', { evidence: answer.evidence })}
+              </p>
             ) : null}
           </div>
         ) : (
-          <p className="review__ai-pending">
-            Awaiting AI evaluation. You can still set a verdict yourself below.
-          </p>
+          <p className="review__ai-pending">{t('review.aiPending')}</p>
         )}
       </div>
 
       {/* Teacher override */}
       <div className="review__override">
         <span className="review__block-label">
-          <PencilLine aria-hidden="true" /> Your verdict
+          <PencilLine aria-hidden="true" /> {t('review.yourVerdict')}
         </span>
         <div className="review__verdicts">
           {VERDICT_LIST.map((v) => {
@@ -196,16 +203,16 @@ function AnswerReview({ index, answer, onSaved }) {
                 aria-pressed={active}
               >
                 {active ? <Check aria-hidden="true" /> : null}
-                {v.label}
+                {t(`verdict.${v.key}`, v.label)}
               </button>
             )
           })}
         </div>
         <Input
-          label="Note (optional)"
+          label={t('review.noteLabel')}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Add context for this correction"
+          placeholder={t('review.notePlaceholder')}
         />
       </div>
     </Card>

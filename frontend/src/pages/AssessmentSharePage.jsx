@@ -1,5 +1,6 @@
 ﻿import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import { Trans, useTranslation } from "react-i18next"
 import {
   ArrowLeft,
   Copy,
@@ -24,6 +25,7 @@ import "./AssessmentSharePage.css"
  * The teacher can jump to the review screen to see verdicts and apply overrides.
  */
 export function AssessmentSharePage() {
+  const { t } = useTranslation()
   const { code } = useParams()
   const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
@@ -37,10 +39,10 @@ export function AssessmentSharePage() {
     return (
       <div className="stack">
         <Link to="/assessments" className="text-link">
-          <ArrowLeft aria-hidden="true" /> Back to assessments
+          <ArrowLeft aria-hidden="true" /> {t("assessmentShare.backToAssessments")}
         </Link>
         <Card>
-          <EmptyState title="Loading…" />
+          <EmptyState title={t("common.loading")} />
         </Card>
       </div>
     )
@@ -53,12 +55,12 @@ export function AssessmentSharePage() {
     return (
       <div className="stack">
         <Link to="/assessments" className="text-link">
-          <ArrowLeft aria-hidden="true" /> Back to assessments
+          <ArrowLeft aria-hidden="true" /> {t("assessmentShare.backToAssessments")}
         </Link>
         <Card>
           <EmptyState
-            title="Assessment not found"
-            message="This code doesn’t match an assessment in this classroom."
+            title={t("assessmentShare.notFound")}
+            message={t("assessmentShare.notFoundSub")}
           />
         </Card>
       </div>
@@ -80,18 +82,18 @@ export function AssessmentSharePage() {
   return (
     <div className="stack">
       <button type="button" className="text-link" onClick={() => navigate(-1)}>
-        <ArrowLeft aria-hidden="true" /> Back to assessments
+        <ArrowLeft aria-hidden="true" /> {t("assessmentShare.backToAssessments")}
       </button>
 
       <PageHeader
-        eyebrow="Assessment"
+        eyebrow={t("assessmentShare.eyebrow")}
         title={assessment.title}
         actions={
           <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center" }}>
             <StatusBadge status={assessment.status} />
             <Button variant="outline" icon={PencilLine}>
               <Link to={`/assessments/${assessment.access_code}/review`}>
-                Review &amp; grade
+                {t("assessmentShare.reviewGrade")}
               </Link>
             </Button>
           </div>
@@ -104,10 +106,13 @@ export function AssessmentSharePage() {
           <QRCode value={studentUrl} size={200} />
         </div>
         <div className="share__info">
-          <h2 className="share__heading">Students join with this code</h2>
+          <h2 className="share__heading">{t("assessmentShare.joinWithCode")}</h2>
           <div className="share__code">{assessment.access_code}</div>
           <p className="share__hint">
-            Scan the QR, or go to <strong>/s</strong> and enter the code.
+            <Trans
+              i18nKey="assessmentShare.scanHint"
+              components={{ 1: <strong /> }}
+            />
           </p>
           <div className="share__link-row">
             <code className="share__link">{studentUrl}</code>
@@ -116,18 +121,20 @@ export function AssessmentSharePage() {
               icon={copied ? Check : Copy}
               onClick={copy}
             >
-              {copied ? "Copied" : "Copy link"}
+              {copied ? t("assessmentShare.copied") : t("assessmentShare.copyLink")}
             </Button>
           </div>
           <Button variant="ghost" icon={Users} className="share__preview">
-            <Link to={`/s/${assessment.access_code}`}>Open student view</Link>
+            <Link to={`/s/${assessment.access_code}`}>
+              {t("assessmentShare.openStudentView")}
+            </Link>
           </Button>
         </div>
       </Card>
 
       <div className="grid-2">
         <Card>
-          <Card.Header title="Passage" />
+          <Card.Header title={t("assessmentShare.passage")} />
           <Card.Body>
             <div className="share__passage-head">
               <BookOpen aria-hidden="true" />
@@ -137,14 +144,18 @@ export function AssessmentSharePage() {
         </Card>
 
         <Card>
-          <Card.Header title={`Questions (${answers.length})`} />
+          <Card.Header
+            title={t("assessmentShare.questions", { count: answers.length })}
+          />
           <Card.Body>
             <ol className="share__questions">
               {answers.map((q, i) => (
                 <li key={q.id} className="share__question">
                   <div className="share__q-head">
                     <span className="share__q-num">{i + 1}</span>
-                    <Badge tone="neutral">{skillLabel(q.skill)}</Badge>
+                    <Badge tone="neutral">
+                      {t(`skills.${q.skill}`, skillLabel(q.skill))}
+                    </Badge>
                   </div>
                   <p className="share__q-text">{q.question_text}</p>
                 </li>
@@ -157,8 +168,8 @@ export function AssessmentSharePage() {
       {/* Evaluation state */}
       <Card>
         <Card.Header
-          title="Status"
-          subtitle="Where this learner's assessment stands"
+          title={t("assessmentShare.statusTitle")}
+          subtitle={t("assessmentShare.statusSub")}
         />
         <Card.Body>
           {assessment.status === "completed" ? (
@@ -166,10 +177,12 @@ export function AssessmentSharePage() {
               <li className="share__response">
                 <span className="share__response-name">
                   {assessment.comprehension_score != null
-                    ? `Scored ${Math.round(Number(assessment.comprehension_score))}%`
+                    ? t("assessmentShare.scored", {
+                        score: Math.round(Number(assessment.comprehension_score)),
+                      })
                     : assessment.evaluation_error
-                      ? "Evaluation needs attention"
-                      : "Submitted — evaluating…"}
+                      ? t("assessmentShare.evalNeedsAttention")
+                      : t("assessmentShare.submittedEvaluating")}
                 </span>
                 <Badge
                   tone={
@@ -182,18 +195,18 @@ export function AssessmentSharePage() {
                   dot
                 >
                   {assessment.evaluation_error
-                    ? "Needs review"
+                    ? t("assessmentShare.needsReview")
                     : assessment.comprehension_score != null
-                      ? "Graded"
-                      : "Pending"}
+                      ? t("assessmentShare.graded")
+                      : t("assessmentShare.pending")}
                 </Badge>
               </li>
             </ul>
           ) : (
             <EmptyState
               icon={ListChecks}
-              title="No submission yet"
-              message="Share the code or QR. Once the learner submits, the AI check runs and results appear in Review."
+              title={t("assessmentShare.noSubmission")}
+              message={t("assessmentShare.noSubmissionSub")}
             />
           )}
         </Card.Body>

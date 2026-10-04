@@ -1,5 +1,6 @@
 ﻿import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import {
   ArrowLeft,
   Plus,
@@ -40,6 +41,7 @@ function todayISO() {
  * stays an inert seam until the extraction backend exists.
  */
 export function AssessmentCreatePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { activeClassroom } = useClassroom()
   const [title, setTitle] = useState("")
@@ -71,13 +73,11 @@ export function AssessmentCreatePage() {
   const onSave = async () => {
     setError(null)
     if (!activeClassroom?.id) {
-      setError("Select or create a classroom first.")
+      setError(t("assessmentCreate.errorNoClassroom"))
       return
     }
     if (!canSave) {
-      setError(
-        "Add a title, a passage, and 3–5 questions — each with its text and expected ideas.",
-      )
+      setError(t("assessmentCreate.errorInvalid"))
       return
     }
     setSaving(true)
@@ -98,9 +98,9 @@ export function AssessmentCreatePage() {
       navigate(`/assessments/${summary.access_code}`)
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.message || "Couldn’t create the assessment.")
+        setError(err.message || t("assessmentCreate.errorCreate"))
       } else {
-        setError("Couldn’t reach the server. Try again shortly.")
+        setError(t("assessmentCreate.errorServer"))
       }
     } finally {
       setSaving(false)
@@ -110,13 +110,13 @@ export function AssessmentCreatePage() {
   return (
     <div className="stack">
       <button type="button" className="text-link" onClick={() => navigate(-1)}>
-        <ArrowLeft aria-hidden="true" /> Back to assessments
+        <ArrowLeft aria-hidden="true" /> {t("assessmentCreate.backToAssessments")}
       </button>
 
       <PageHeader
-        eyebrow="New assessment"
-        title="Create an assessment"
-        subtitle="Add a reading passage and 3–5 questions. Scheduling it gives every learner in the class a copy and a shared join code."
+        eyebrow={t("assessmentCreate.eyebrow")}
+        title={t("assessmentCreate.title")}
+        subtitle={t("assessmentCreate.subtitle")}
       />
 
       {/* PDF / AI upload seam — inert until a backend is connected */}
@@ -127,48 +127,44 @@ export function AssessmentCreatePage() {
           </span>
           <div>
             <h3 className="create__ai-title">
-              Generate from a PDF or photo
+              {t("assessmentCreate.aiTitle")}
               <Badge tone="neutral" icon={Lock}>
-                Needs AI backend
+                {t("assessmentCreate.aiBadge")}
               </Badge>
             </h3>
-            <p className="create__ai-desc">
-              Upload printed material and let AI pull out the passage and
-              questions. For now, use the on-device scanner on the Assessments
-              page, or build the assessment below.
-            </p>
+            <p className="create__ai-desc">{t("assessmentCreate.aiDesc")}</p>
           </div>
         </div>
         <Button variant="outline" icon={FileUp} disabled>
-          Upload material
+          {t("assessmentCreate.uploadMaterial")}
         </Button>
       </Card>
 
       <Card>
-        <Card.Header title="Details" />
+        <Card.Header title={t("assessmentCreate.details")} />
         <Card.Body>
           <div className="stack">
             <Input
-              label="Title"
+              label={t("assessmentCreate.fieldTitle")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. The Lighthouse Keeper"
+              placeholder={t("assessmentCreate.titlePlaceholder")}
             />
             <Input
-              label="Category"
+              label={t("assessmentCreate.category")}
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              placeholder="e.g. Fiction"
+              placeholder={t("assessmentCreate.categoryPlaceholder")}
             />
             <Input
-              label="Scheduled for"
+              label={t("assessmentCreate.scheduledFor")}
               type="date"
               value={scheduledFor}
               onChange={(e) => setScheduledFor(e.target.value)}
             />
             <div className="field">
               <label className="field__label" htmlFor="passage">
-                Passage
+                {t("assessmentCreate.passage")}
               </label>
               <textarea
                 id="passage"
@@ -176,7 +172,7 @@ export function AssessmentCreatePage() {
                 rows={9}
                 value={passage}
                 onChange={(e) => setPassage(e.target.value)}
-                placeholder="Paste the reading passage students will see…"
+                placeholder={t("assessmentCreate.passagePlaceholder")}
               />
             </div>
           </div>
@@ -185,44 +181,48 @@ export function AssessmentCreatePage() {
 
       <Card>
         <Card.Header
-          title="Questions"
-          subtitle="3–5 questions. Tag each with the skill it targets and the key ideas a correct answer should mention."
+          title={t("assessmentCreate.questions")}
+          subtitle={t("assessmentCreate.questionsSub")}
         />
         <Card.Body>
           <div className="stack">
             {questions.map((q, i) => (
               <div className="create__q" key={i}>
                 <div className="create__q-head">
-                  <span className="create__q-num">Question {i + 1}</span>
+                  <span className="create__q-num">
+                    {t("assessmentCreate.question", { number: i + 1 })}
+                  </span>
                   <button
                     type="button"
                     className="create__q-remove"
                     onClick={() => removeQuestion(i)}
                     disabled={questions.length <= 3}
-                    aria-label={`Remove question ${i + 1}`}
+                    aria-label={t("assessmentCreate.removeQuestion", {
+                      number: i + 1,
+                    })}
                   >
                     <Trash2 aria-hidden="true" />
                   </button>
                 </div>
                 <Input
-                  label="Question"
+                  label={t("assessmentCreate.questionLabel")}
                   value={q.question_text}
                   onChange={(e) =>
                     setQuestion(i, { question_text: e.target.value })
                   }
-                  placeholder="e.g. What is the main idea of the passage?"
+                  placeholder={t("assessmentCreate.questionPlaceholder")}
                 />
                 <Input
-                  label="Expected ideas"
+                  label={t("assessmentCreate.expectedIdeas")}
                   value={q.expected_ideas}
                   onChange={(e) =>
                     setQuestion(i, { expected_ideas: e.target.value })
                   }
-                  placeholder="Key points a correct answer should mention"
+                  placeholder={t("assessmentCreate.expectedIdeasPlaceholder")}
                 />
                 <div className="field">
                   <label className="field__label" htmlFor={`skill-${i}`}>
-                    Skill
+                    {t("assessmentCreate.skill")}
                   </label>
                   <div className="field__control">
                     <select
@@ -247,7 +247,7 @@ export function AssessmentCreatePage() {
               onClick={addQuestion}
               disabled={questions.length >= 5}
             >
-              Add question
+              {t("assessmentCreate.addQuestion")}
             </Button>
           </div>
         </Card.Body>
@@ -261,10 +261,12 @@ export function AssessmentCreatePage() {
 
       <div className="create__actions">
         <Button variant="ghost" onClick={() => navigate("/assessments")}>
-          Cancel
+          {t("assessmentCreate.cancel")}
         </Button>
         <Button icon={ClipboardList} onClick={onSave} disabled={saving}>
-          {saving ? "Scheduling…" : "Create & get code"}
+          {saving
+            ? t("assessmentCreate.scheduling")
+            : t("assessmentCreate.createGetCode")}
         </Button>
       </div>
     </div>

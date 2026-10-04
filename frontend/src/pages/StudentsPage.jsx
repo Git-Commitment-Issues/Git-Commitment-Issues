@@ -1,5 +1,6 @@
 ﻿import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { Search, UserPlus, ChevronRight } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { Button, Card, Input, Avatar, EmptyState } from "@/components/ui"
@@ -18,6 +19,7 @@ import "./StudentsPage.css"
  * the roster shows the fields the API actually provides.
  */
 export function StudentsPage() {
+  const { t } = useTranslation()
   const { activeClassroom, loading: classroomLoading } = useClassroom()
   const classroomId = activeClassroom?.id ?? null
   const [filter, setFilter] = useState("")
@@ -43,12 +45,12 @@ export function StudentsPage() {
   return (
     <div className="stack">
       <PageHeader
-        eyebrow={activeClassroom?.name ?? "Roster"}
-        title="Students"
-        subtitle="Every learner in this class. Rows open the individual report with assessment history and progress."
+        eyebrow={activeClassroom?.name ?? t("students.rosterFallback")}
+        title={t("students.title")}
+        subtitle={t("students.subtitle")}
         actions={
           <Button icon={UserPlus} variant="outline">
-            Add student
+            {t("students.addStudent")}
           </Button>
         }
       />
@@ -57,8 +59,8 @@ export function StudentsPage() {
         <div className="students__toolbar">
           <Input
             icon={Search}
-            placeholder="Filter by name or LRN…"
-            aria-label="Filter students"
+            placeholder={t("students.filterPlaceholder")}
+            aria-label={t("students.filterLabel")}
             className="students__filter"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -66,33 +68,33 @@ export function StudentsPage() {
         </div>
 
         {isLoading ? (
-          <EmptyState title="Loading…" />
+          <EmptyState title={t("common.loading")} />
         ) : students.length === 0 ? (
           <div className="students__empty">
             <Mascot variant="reading" size="lg" />
             <h3 className="students__empty-title">
-              {classroomId ? "No students yet" : "No classroom selected"}
+              {classroomId ? t("students.noStudents") : t("students.noClassroom")}
             </h3>
             <p className="students__empty-text">
               {classroomId
-                ? "Add learners to this classroom to build the roster."
-                : "Select or create a classroom to see its roster."}
+                ? t("students.noStudentsText")
+                : t("students.noClassroomText")}
             </p>
           </div>
         ) : (
           <div
             className="students__table"
             role="table"
-            aria-label="Student roster"
+            aria-label={t("students.rosterLabel")}
           >
             <div className="students__head" role="row">
-              <span role="columnheader">Student</span>
-              <span role="columnheader">LRN</span>
+              <span role="columnheader">{t("students.colStudent")}</span>
+              <span role="columnheader">{t("students.colLrn")}</span>
               <span role="columnheader" className="students__col-focus">
-                Status
+                {t("students.colStatus")}
               </span>
               <span role="columnheader" className="sr-only">
-                View
+                {t("students.colView")}
               </span>
             </div>
 
@@ -118,7 +120,9 @@ export function StudentsPage() {
                     </span>
 
                     <span className="students__cell students__col-focus">
-                      {student.is_active ? "Active" : "Inactive"}
+                      {student.is_active
+                        ? t("students.active")
+                        : t("students.inactive")}
                     </span>
 
                     <span className="students__cell students__cell--chevron">

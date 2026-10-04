@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Moon, Sun, User, School, Bell } from 'lucide-react'
+import { Moon, Sun, Languages, User, School, Bell } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { PageHeader } from '@/components/layout'
 import { Card, Input, Button } from '@/components/ui'
 import { useTheme } from '@/theme/useTheme'
+import { useLanguage } from '@/i18n/useLanguage'
 import { cn } from '@/lib/cn'
 import './SettingsPage.css'
 
@@ -19,11 +21,14 @@ const SAVED_PROFILE = {
 
 /**
  * SettingsPage — account, class, and appearance preferences. The appearance
- * section is fully wired to the theme context; the account/class fields are a
- * controlled draft so Discard can revert edits back to the last-saved values.
+ * section is fully wired to the theme + language contexts; the account/class
+ * fields are a controlled draft so Discard can revert edits back to the
+ * last-saved values.
  */
 export function SettingsPage() {
+  const { t } = useTranslation()
   const { theme, setTheme } = useTheme()
+  const { language, setLanguage } = useLanguage()
 
   // Draft form state, seeded from the saved baseline.
   const [form, setForm] = useState(SAVED_PROFILE)
@@ -40,28 +45,35 @@ export function SettingsPage() {
   const handleDiscard = () => setForm(SAVED_PROFILE)
 
   const themeOptions = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
+    { value: 'light', label: t('theme.light'), icon: Sun },
+    { value: 'dark', label: t('theme.dark'), icon: Moon },
+  ]
+  const languageOptions = [
+    { value: 'en', label: t('language.english') },
+    { value: 'fil', label: t('language.filipino') },
   ]
 
   return (
     <div className="stack">
       <PageHeader
-        eyebrow="Preferences"
-        title="Settings"
-        subtitle="Manage your account, class details, and how pahina. looks and notifies you."
+        eyebrow={t('settings.eyebrow')}
+        title={t('settings.title')}
+        subtitle={t('settings.subtitle')}
       />
 
       <Card>
         <Card.Header
-          title="Appearance"
-          subtitle="Choose how pahina. looks on this device"
+          title={t('settings.appearance')}
+          subtitle={t('settings.appearanceSub')}
         />
         <Card.Body>
+          <div className="settings__field-label">
+            <Sun aria-hidden="true" /> {t('theme.label')}
+          </div>
           <div
             className="settings__theme"
             role="radiogroup"
-            aria-label="Theme"
+            aria-label={t('theme.label')}
           >
             {themeOptions.map((option) => {
               const Icon = option.icon
@@ -84,13 +96,41 @@ export function SettingsPage() {
               )
             })}
           </div>
+
+          <div className="settings__field-label settings__field-label--spaced">
+            <Languages aria-hidden="true" /> {t('language.label')}
+          </div>
+          <div
+            className="settings__theme"
+            role="radiogroup"
+            aria-label={t('language.label')}
+          >
+            {languageOptions.map((option) => {
+              const active = language === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  className={cn(
+                    'settings__theme-option',
+                    active && 'settings__theme-option--active',
+                  )}
+                  onClick={() => setLanguage(option.value)}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
         </Card.Body>
       </Card>
 
       <Card>
         <Card.Header
-          title="Account"
-          subtitle="Your teacher profile"
+          title={t('settings.account')}
+          subtitle={t('settings.accountSub')}
           action={
             <span className="settings__icon-chip">
               <User aria-hidden="true" />
@@ -100,12 +140,12 @@ export function SettingsPage() {
         <Card.Body>
           <div className="settings__grid">
             <Input
-              label="Full name"
+              label={t('settings.fullName')}
               value={form.fullName}
               onChange={setField('fullName')}
             />
             <Input
-              label="Email"
+              label={t('settings.email')}
               type="email"
               value={form.email}
               onChange={setField('email')}
@@ -116,8 +156,8 @@ export function SettingsPage() {
 
       <Card>
         <Card.Header
-          title="Class"
-          subtitle="Details shown on assessments and reports"
+          title={t('settings.class')}
+          subtitle={t('settings.classSub')}
           action={
             <span className="settings__icon-chip">
               <School aria-hidden="true" />
@@ -127,12 +167,12 @@ export function SettingsPage() {
         <Card.Body>
           <div className="settings__grid">
             <Input
-              label="Class name"
+              label={t('settings.className')}
               value={form.className}
               onChange={setField('className')}
             />
             <Input
-              label="Section"
+              label={t('settings.section')}
               value={form.section}
               onChange={setField('section')}
             />
@@ -142,8 +182,8 @@ export function SettingsPage() {
 
       <Card>
         <Card.Header
-          title="Notifications"
-          subtitle="When pahina. should alert you"
+          title={t('settings.notifications')}
+          subtitle={t('settings.notificationsSub')}
           action={
             <span className="settings__icon-chip">
               <Bell aria-hidden="true" />
@@ -152,18 +192,16 @@ export function SettingsPage() {
         />
         <Card.Body>
           <p className="settings__placeholder">
-            Notification preferences — such as alerts when an assessment session
-            closes or when a student is flagged for support — will be
-            configurable here.
+            {t('settings.notificationsPlaceholder')}
           </p>
         </Card.Body>
       </Card>
 
       <div className="settings__actions">
         <Button variant="ghost" onClick={handleDiscard} disabled={!isDirty}>
-          Discard
+          {t('common.discard')}
         </Button>
-        <Button variant="primary">Save changes</Button>
+        <Button variant="primary">{t('common.save')}</Button>
       </div>
     </div>
   )
