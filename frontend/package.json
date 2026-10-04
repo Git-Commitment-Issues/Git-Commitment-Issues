@@ -10,13 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "i18next": "^25.10.10",
+    "i18next": "25.10.10",
     "lucide-react": "^0.468.0",
     "ogl": "^1.0.11",
     "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-i18next": "^16.6.6",
+    "react-i18next": "16.6.6",
     "react-router-dom": "^7.1.1",
     "recharts": "^2.15.4",
     "tesseract.js": "^7.0.0"
