@@ -10,6 +10,8 @@ import { PageHeader } from '@/components/layout'
 import { Button, Card, Avatar, ProficiencyBadge, EmptyState } from '@/components/ui'
 import { StatCard } from '@/components/data'
 import { SkillBarChart, ProficiencyDonut, ChartReveal } from '@/components/charts'
+import { Mascot } from '@/components/brand/Mascot'
+import { useSession } from '@/session/useSession'
 import { useClassroom } from '@/session/useClassroom'
 import { useAsync } from '@/hooks/useAsync'
 import { repository } from '@/services'
@@ -28,8 +30,13 @@ import './DashboardPage.css'
  * so nothing is fabricated.
  */
 export function DashboardPage() {
+  const { user } = useSession()
   const { activeClassroom, loading: classroomLoading } = useClassroom()
   const classroomId = activeClassroom?.id ?? null
+  // Greet with the full name. Picking the first whitespace token breaks on
+  // names that lead with an honorific (e.g. "Ms. Reyes" -> "Ms."), so use the
+  // whole display name instead.
+  const displayName = (user?.name ?? '').trim()
 
   const { data, loading, error } = useAsync(async () => {
     if (!classroomId) return null
@@ -92,6 +99,21 @@ export function DashboardPage() {
 
   return (
     <div className="stack">
+      {/* Welcome banner — the pahina dragon greets the teacher, using the
+          empty space on the right of the heading. */}
+      <Card raised className="dashboard__welcome">
+        <div className="dashboard__welcome-text">
+          <p className="dashboard__welcome-eyebrow">Welcome back</p>
+          <h2 className="dashboard__welcome-title">
+            {displayName ? `Hi, ${displayName}!` : 'Hi there!'}
+          </h2>
+          <p className="dashboard__welcome-sub">
+            Here’s how your class is doing today.
+          </p>
+        </div>
+        <Mascot variant="welcome" size="md" float className="dashboard__welcome-mascot" />
+      </Card>
+
       <PageHeader
         eyebrow={activeClassroom?.name ?? 'Class overview'}
         title="Class overview"

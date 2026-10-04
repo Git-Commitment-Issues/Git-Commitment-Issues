@@ -1,0 +1,60 @@
+.profile__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.profile__identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.profile__name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.profile__role {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.profile__role-icon,
+.profile__fact-icon {
+  width: 1em;
+  height: 1em;
+}
+
+.profile__facts {
+  margin-top: var(--space-6);
+  display: grid;
+  gap: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-5);
+}
+
+.profile__fact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.profile__fact-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.profile__fact-value {
+  color: var(--color-text);
+  font-weight: 600;
+}

@@ -1,4 +1,5 @@
 ﻿import { Bell, Menu, Search } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { Avatar, IconButton } from "@/components/ui"
 import { ThemeToggle } from "./ThemeToggle"
 import "./Topbar.css"
@@ -8,14 +9,15 @@ import "./Topbar.css"
  *
  * Holds: mobile menu trigger, a quick-search field, the theme toggle, a
  * notifications indicator, and the signed-in user's avatar. Clicking the user
- * button signs out.
+ * button opens the profile page (sign-out now lives there).
  *
  * Props:
  *   onOpenMobileNav: () => void
- *   onLogout: () => void
  *   user: { name: string, role: string }
  */
-export function Topbar({ onOpenMobileNav, onLogout, user }) {
+export function Topbar({ onOpenMobileNav, user }) {
+  const navigate = useNavigate()
+
   return (
     <header className="topbar">
       <div className="topbar__left">
@@ -44,8 +46,8 @@ export function Topbar({ onOpenMobileNav, onLogout, user }) {
         <button
           type="button"
           className="topbar__user"
-          onClick={onLogout}
-          title="Sign out"
+          onClick={() => navigate("/profile")}
+          title="View profile"
         >
           <Avatar name={user.name} size="sm" />
           <span className="topbar__user-meta">

@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import { Moon, Sun, User, School, Bell } from 'lucide-react'
 import { PageHeader } from '@/components/layout'
 import { Card, Input, Button } from '@/components/ui'
@@ -5,13 +6,38 @@ import { useTheme } from '@/theme/useTheme'
 import { cn } from '@/lib/cn'
 import './SettingsPage.css'
 
+// Last-saved baseline for the editable form fields. Discard reverts the
+// in-progress edits back to these values (rather than clearing the inputs),
+// and Save would promote the current draft to the new baseline once a backend
+// endpoint exists.
+const SAVED_PROFILE = {
+  fullName: 'Elena Reyes',
+  email: 'e.reyes@school.edu',
+  className: 'Grade 8 English',
+  section: 'Section A',
+}
+
 /**
  * SettingsPage — account, class, and appearance preferences. The appearance
- * section is fully wired to the theme context; the rest are structural
- * placeholders ready to connect to the backend.
+ * section is fully wired to the theme context; the account/class fields are a
+ * controlled draft so Discard can revert edits back to the last-saved values.
  */
 export function SettingsPage() {
   const { theme, setTheme } = useTheme()
+
+  // Draft form state, seeded from the saved baseline.
+  const [form, setForm] = useState(SAVED_PROFILE)
+
+  const setField = (key) => (e) =>
+    setForm((prev) => ({ ...prev, [key]: e.target.value }))
+
+  // Discard only enables when the draft actually differs from the baseline.
+  const isDirty = useMemo(
+    () => Object.keys(SAVED_PROFILE).some((k) => form[k] !== SAVED_PROFILE[k]),
+    [form],
+  )
+
+  const handleDiscard = () => setForm(SAVED_PROFILE)
 
   const themeOptions = [
     { value: 'light', label: 'Light', icon: Sun },
@@ -73,11 +99,16 @@ export function SettingsPage() {
         />
         <Card.Body>
           <div className="settings__grid">
-            <Input label="Full name" defaultValue="Elena Reyes" />
+            <Input
+              label="Full name"
+              value={form.fullName}
+              onChange={setField('fullName')}
+            />
             <Input
               label="Email"
               type="email"
-              defaultValue="e.reyes@school.edu"
+              value={form.email}
+              onChange={setField('email')}
             />
           </div>
         </Card.Body>
@@ -95,8 +126,16 @@ export function SettingsPage() {
         />
         <Card.Body>
           <div className="settings__grid">
-            <Input label="Class name" defaultValue="Grade 8 English" />
-            <Input label="Section" defaultValue="Section A" />
+            <Input
+              label="Class name"
+              value={form.className}
+              onChange={setField('className')}
+            />
+            <Input
+              label="Section"
+              value={form.section}
+              onChange={setField('section')}
+            />
           </div>
         </Card.Body>
       </Card>
@@ -121,7 +160,9 @@ export function SettingsPage() {
       </Card>
 
       <div className="settings__actions">
-        <Button variant="ghost">Discard</Button>
+        <Button variant="ghost" onClick={handleDiscard} disabled={!isDirty}>
+          Discard
+        </Button>
         <Button variant="primary">Save changes</Button>
       </div>
     </div>

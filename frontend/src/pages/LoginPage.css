@@ -8,7 +8,9 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-5);
-  background-color: var(--color-bg);
+  /* Transparent so the global animated AppBackground (theme-matched) shows
+     through behind the sign-in card, just like the main app pages. */
+  background-color: transparent;
 }
 
 .login__card {
@@ -89,4 +91,18 @@
 .login__error {
   font-size: var(--text-sm);
   color: var(--color-error);
+}
+
+.login__foot {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.login__link {
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.login__link:hover {
+  text-decoration: underline;
 }

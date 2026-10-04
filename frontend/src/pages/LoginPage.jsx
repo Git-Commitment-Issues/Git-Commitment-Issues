@@ -2,6 +2,7 @@
 import { User, Hash } from "lucide-react"
 import { Card, Input, Button } from "@/components/ui"
 import { Logo } from "@/components/brand/Logo"
+import { RegisterModal } from "./RegisterModal"
 import { useSession } from "@/session/useSession"
 import { ApiError } from "@/services"
 import "./LoginPage.css"
@@ -22,6 +23,7 @@ export function LoginPage() {
   const [lrn, setLrn] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
+  const [showRegister, setShowRegister] = useState(false)
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -131,7 +133,23 @@ export function LoginPage() {
             {submitting ? "Signing in…" : "Sign in"}
           </Button>
         </form>
+
+        <p className="login__foot">
+          Don’t have an account?{" "}
+          <button
+            type="button"
+            className="login__link"
+            onClick={() => setShowRegister(true)}
+          >
+            Create one
+          </button>
+        </p>
       </Card>
+
+      <RegisterModal
+        open={showRegister}
+        onClose={() => setShowRegister(false)}
+      />
     </div>
   )
 }

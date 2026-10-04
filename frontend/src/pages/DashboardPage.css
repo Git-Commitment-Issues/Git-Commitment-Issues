@@ -83,3 +83,56 @@
   font-size: var(--text-sm);
   max-width: 76ch;
 }
+
+/* ---- Welcome banner (dragon mascot) -------------------------------------- */
+.dashboard__welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  overflow: hidden;
+  box-shadow: none; /* flat — no raised shadow here */
+  background:
+    radial-gradient(
+      120% 140% at 100% 0%,
+      var(--color-primary-soft),
+      transparent 60%
+    ),
+    var(--color-surface-raised);
+}
+
+.dashboard__welcome-text {
+  min-width: 0;
+}
+.dashboard__welcome-eyebrow {
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-1);
+}
+.dashboard__welcome-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: 1.1;
+}
+.dashboard__welcome-sub {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.dashboard__welcome-mascot {
+  flex-shrink: 0;
+  /* Nudge the dragon so it sits snug in the banner's right space. */
+  margin: calc(-1 * var(--space-3)) 0 calc(-1 * var(--space-5));
+}
+
+/* On narrow screens the mascot would crowd the text — hide it. */
+@media (max-width: 560px) {
+  .dashboard__welcome-mascot {
+    display: none;
+  }
+}

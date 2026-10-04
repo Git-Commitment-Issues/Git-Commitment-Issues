@@ -83,13 +83,13 @@
   --brand-success: #22d16b;
   --brand-error: #ff4d4d;
 
-  /* Surfaces — deep near-black for higher contrast. Base is almost pure
-     black; surfaces stepped up just enough to separate cards from the page. */
-  --color-bg: #050506;
-  --color-surface: #0e0f11;
-  --color-surface-raised: #16181b;
-  --color-surface-hover: #0a0b0c; /* slight darken on hover */
-  --color-input: #0b0c0e;
+  /* Surfaces — very close to black (but not pure) for max contrast. Base is
+     nearly black; surfaces stepped up just enough to separate cards. */
+  --color-bg: #030304;
+  --color-surface: #0a0a0c;
+  --color-surface-raised: #111214;
+  --color-surface-hover: #060608; /* slight darken on hover */
+  --color-input: #08080a;
 
   /* Text */
   --color-text: #f5f7f9;

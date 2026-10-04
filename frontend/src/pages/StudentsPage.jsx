@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { Search, UserPlus, ChevronRight } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { Button, Card, Input, Avatar, EmptyState } from "@/components/ui"
+import { Mascot } from "@/components/brand/Mascot"
 import { useClassroom } from "@/session/useClassroom"
 import { useAsync } from "@/hooks/useAsync"
 import { repository } from "@/services"
@@ -67,14 +68,17 @@ export function StudentsPage() {
         {isLoading ? (
           <EmptyState title="Loading…" />
         ) : students.length === 0 ? (
-          <EmptyState
-            title={classroomId ? "No students yet" : "No classroom selected"}
-            message={
-              classroomId
+          <div className="students__empty">
+            <Mascot variant="reading" size="lg" />
+            <h3 className="students__empty-title">
+              {classroomId ? "No students yet" : "No classroom selected"}
+            </h3>
+            <p className="students__empty-text">
+              {classroomId
                 ? "Add learners to this classroom to build the roster."
-                : "Select or create a classroom to see its roster."
-            }
-          />
+                : "Select or create a classroom to see its roster."}
+            </p>
+          </div>
         ) : (
           <div
             className="students__table"

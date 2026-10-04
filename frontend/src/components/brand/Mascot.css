@@ -1,0 +1,40 @@
+.mascot {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+  /* Soft drop shadow so the mascot reads against any surface. */
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.25));
+}
+
+.mascot--sm {
+  height: 72px;
+}
+.mascot--md {
+  height: 120px;
+}
+.mascot--lg {
+  height: 200px;
+}
+
+/* Gentle idle bob — subtle, respects reduced motion. */
+.mascot--float {
+  animation: mascot-bob 4s var(--ease-out) infinite;
+}
+
+@keyframes mascot-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot--float {
+    animation: none;
+  }
+}
