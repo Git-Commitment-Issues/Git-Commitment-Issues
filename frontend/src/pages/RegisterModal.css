@@ -1,0 +1,181 @@
+/* RegisterModal — centered two-column sign-up dialog. */
+
+.reg {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  animation: reg-scrim var(--dur-base) var(--ease-out);
+}
+
+.reg__panel {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  max-height: calc(100vh - 2 * var(--space-6));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: reg-pop var(--dur-base) var(--ease-out);
+}
+
+/* Left column — illustration fills the column edge to edge, no padding. */
+.reg__media {
+  background-color: var(--color-surface-raised);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100%;
+}
+
+/* Right column — the form, with its own padding. */
+.reg__form-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-7) var(--space-6);
+  overflow-y: auto;
+}
+
+.reg__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.reg__close:hover {
+  background-color: var(--color-muted-soft);
+  color: var(--color-text);
+}
+.reg__close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.reg__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: 1.15;
+  color: var(--color-text);
+}
+.reg__title-accent {
+  color: var(--color-primary);
+}
+.reg__subtitle {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.reg__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background-color: var(--color-muted-soft);
+  border-radius: var(--radius-md);
+}
+.reg__tab {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.reg__tab--active {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm, none);
+}
+
+.reg__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.reg__submit {
+  width: 100%;
+  justify-content: center;
+}
+.reg__notice {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-3);
+  background-color: var(--color-accent-soft);
+  border-radius: var(--radius-md);
+  line-height: var(--leading-normal);
+}
+
+.reg__foot {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.reg__link {
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.reg__link:hover {
+  text-decoration: underline;
+}
+
+@keyframes reg-scrim {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes reg-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Narrow screens: single column, drop the illustration. */
+@media (max-width: 720px) {
+  .reg__panel {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+  }
+  .reg__media {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reg,
+  .reg__panel {
+    animation: none;
+  }
+}

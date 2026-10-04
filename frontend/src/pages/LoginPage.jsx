@@ -1,6 +1,8 @@
 ﻿import { useState } from "react"
-import { GraduationCap, User, Hash } from "lucide-react"
+import { User, Hash } from "lucide-react"
 import { Card, Input, Button } from "@/components/ui"
+import { Logo } from "@/components/brand/Logo"
+import { RegisterModal } from "./RegisterModal"
 import { useSession } from "@/session/useSession"
 import { ApiError } from "@/services"
 import "./LoginPage.css"
@@ -21,6 +23,7 @@ export function LoginPage() {
   const [lrn, setLrn] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
+  const [showRegister, setShowRegister] = useState(false)
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -55,10 +58,10 @@ export function LoginPage() {
     <div className="login">
       <Card raised className="login__card">
         <div className="login__brand">
-          <span className="login__brand-icon">
-            <GraduationCap aria-hidden="true" />
-          </span>
-          <h1 className="login__title">AnaRead</h1>
+          <Logo compact className="login__logo" />
+          <h1 className="login__title">
+            pahina<span className="login__title-accent">.</span>
+          </h1>
           <p className="login__subtitle">
             Reading-comprehension screening for teachers and learners.
           </p>
@@ -130,7 +133,23 @@ export function LoginPage() {
             {submitting ? "Signing in…" : "Sign in"}
           </Button>
         </form>
+
+        <p className="login__foot">
+          Don’t have an account?{" "}
+          <button
+            type="button"
+            className="login__link"
+            onClick={() => setShowRegister(true)}
+          >
+            Create one
+          </button>
+        </p>
       </Card>
+
+      <RegisterModal
+        open={showRegister}
+        onClose={() => setShowRegister(false)}
+      />
     </div>
   )
 }

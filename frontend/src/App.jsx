@@ -39,6 +39,9 @@ const ReviewPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import("@/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
 )
+const ProfilePage = lazy(() =>
+  import("@/pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
+)
 const NotFoundPage = lazy(() =>
   import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
 )
@@ -149,6 +152,14 @@ function TeacherApp() {
           element={
             <Suspense fallback={<RouteFallback />}>
               <SettingsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="profile"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <ProfilePage />
             </Suspense>
           }
         />

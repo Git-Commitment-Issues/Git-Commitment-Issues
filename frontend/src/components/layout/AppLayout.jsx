@@ -20,7 +20,7 @@ const PLACEHOLDER_USER = {
  * the active route via the direction-aware <PageTransition /> (new design).
  */
 export function AppLayout() {
-  const { user, logout } = useSession()
+  const { user } = useSession()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -63,7 +63,6 @@ export function AppLayout() {
         <div className="app-shell__main">
           <Topbar
             user={topbarUser}
-            onLogout={logout}
             onOpenMobileNav={() => setMobileOpen(true)}
           />
           <main className="app-shell__content" id="main-content" tabIndex={-1}>

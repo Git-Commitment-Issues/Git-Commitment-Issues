@@ -8,15 +8,19 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-5);
-  background-color: var(--color-bg);
+  /* Transparent so the global animated AppBackground (theme-matched) shows
+     through behind the sign-in card, just like the main app pages. */
+  background-color: transparent;
 }
 
 .login__card {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  /* Roomier padding so the content breathes. */
+  padding: var(--space-8) var(--space-7);
 }
 
 .login__brand {
@@ -26,26 +30,21 @@
   text-align: center;
   gap: var(--space-2);
 }
-.login__brand-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-lg);
-  background-color: var(--color-primary-soft, var(--color-muted-soft));
-  color: var(--color-primary);
-  margin-bottom: var(--space-1);
-}
-.login__brand-icon svg {
-  width: 24px;
-  height: 24px;
+/* Logo mark sits on top, scaled up for presence. */
+.login__logo {
+  transform: scale(1.4);
+  margin-bottom: var(--space-4);
 }
 .login__title {
   font-family: var(--font-display);
-  font-size: var(--text-2xl, var(--text-xl));
-  letter-spacing: var(--tracking-display);
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
   color: var(--color-text);
+}
+.login__title-accent {
+  color: var(--color-primary);
 }
 .login__subtitle {
   font-size: var(--text-sm);
@@ -92,4 +91,18 @@
 .login__error {
   font-size: var(--text-sm);
   color: var(--color-error);
+}
+
+.login__foot {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.login__link {
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.login__link:hover {
+  text-decoration: underline;
 }

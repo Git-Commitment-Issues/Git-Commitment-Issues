@@ -24,9 +24,19 @@ export function TrendAreaChart({ data }) {
       <AreaChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>
         <defs>
           <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={c.primary} stopOpacity={0.35} />
-            <stop offset="100%" stopColor={c.primary} stopOpacity={0} />
+            <stop offset="0%" stopColor="#2bd4f5" stopOpacity={0.28} />
+            <stop offset="100%" stopColor="#2bd4f5" stopOpacity={0} />
           </linearGradient>
+          {/* Soft neon glow for the line. */}
+          <filter id="trendGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow
+              dx="0"
+              dy="0"
+              stdDeviation="4"
+              floodColor="#2bd4f5"
+              floodOpacity="0.65"
+            />
+          </filter>
         </defs>
         <CartesianGrid stroke={c.border} strokeDasharray="3 3" vertical={false} />
         <XAxis
@@ -47,10 +57,11 @@ export function TrendAreaChart({ data }) {
           type="monotone"
           dataKey="score"
           name="Class average"
-          stroke={c.primary}
-          strokeWidth={2.5}
+          stroke="#2bd4f5"
+          strokeWidth={2}
           fill="url(#trendFill)"
-          dot={{ r: 3, fill: c.primary, strokeWidth: 0 }}
+          filter="url(#trendGlow)"
+          dot={{ r: 3, fill: '#2bd4f5', strokeWidth: 0 }}
           activeDot={{ r: 5 }}
         />
       </AreaChart>

@@ -1,6 +1,7 @@
 ﻿import { Link } from "react-router-dom"
 import { BookOpen, Bell, CheckCircle2, Clock } from "lucide-react"
 import { Logo } from "@/components/brand/Logo"
+import { Mascot } from "@/components/brand/Mascot"
 import { ThemeToggle } from "@/components/layout"
 import { Card, Badge, Button, ProficiencyBadge, EmptyState } from "@/components/ui"
 import { useSession } from "@/session/useSession"
@@ -92,12 +93,22 @@ export function LearnerHomePage() {
     <LearnerShell userName={user?.name ?? "Learner"} onLogout={logout}>
       <div className="stack">
         <header className="learner__header">
-          <p className="learner__eyebrow">Welcome{user?.name ? `, ${user.name}` : ""}</p>
-          <h1 className="learner__title">Your assessments</h1>
-          <p className="learner__subtitle">
-            Take the reading checks assigned to you, then review your results and
-            your teacher’s feedback.
-          </p>
+          <div className="learner__header-text">
+            <p className="learner__eyebrow">
+              Welcome{user?.name ? `, ${user.name}` : ""}
+            </p>
+            <h1 className="learner__title">Your assessments</h1>
+            <p className="learner__subtitle">
+              Take the reading checks assigned to you, then review your results
+              and your teacher’s feedback.
+            </p>
+          </div>
+          <Mascot
+            variant="star"
+            size="md"
+            float
+            className="learner__header-mascot"
+          />
         </header>
 
         {alert ? (

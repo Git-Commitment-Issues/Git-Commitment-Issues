@@ -49,6 +49,9 @@
   flex-direction: column;
   gap: var(--space-4);
 }
+.student__join-switch {
+  margin-top: var(--space-5);
+}
 .student__code-input :where(.field__input) {
   text-align: center;
   letter-spacing: 0.3em;

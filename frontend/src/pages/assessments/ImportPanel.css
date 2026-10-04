@@ -4,6 +4,15 @@
   gap: var(--space-4, 1rem);
 }
 
+/* When shown inside the scan modal, the modal provides the surface/padding,
+   so drop the panel's own Card chrome to avoid a card-in-card look. */
+.modal__body .import-panel {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
 .import-panel__head {
   display: flex;
   flex-direction: column;

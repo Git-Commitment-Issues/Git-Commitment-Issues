@@ -83,12 +83,13 @@
   --brand-success: #22d16b;
   --brand-error: #ff4d4d;
 
-  /* Surfaces — neutral near-black (no teal cast) with a faint cool tint. */
-  --color-bg: #0a0b0d;
-  --color-surface: #141518;
-  --color-surface-raised: #1c1e22;
-  --color-surface-hover: #0f1012; /* slight darken on hover */
-  --color-input: #121316;
+  /* Surfaces — very close to black (but not pure) for max contrast. Base is
+     nearly black; surfaces stepped up just enough to separate cards. */
+  --color-bg: #030304;
+  --color-surface: #0a0a0c;
+  --color-surface-raised: #111214;
+  --color-surface-hover: #060608; /* slight darken on hover */
+  --color-input: #08080a;
 
   /* Text */
   --color-text: #f5f7f9;
@@ -97,8 +98,8 @@
   --color-on-brand: #06100f; /* text that sits on primary/accent fills */
 
   /* Lines & structure */
-  --color-border: #2c2f35;
-  --color-border-subtle: #212328;
+  --color-border: #26292f;
+  --color-border-subtle: #1a1c20;
 
   /* Interactive brand roles */
   --color-primary: var(--brand-primary);

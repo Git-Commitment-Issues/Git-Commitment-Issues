@@ -4,35 +4,13 @@
   gap: var(--space-3);
 }
 
+/* Theme-aware logo mark (SVG asset). Square source, rendered at nav scale. */
 .logo__mark {
-  position: relative;
-  display: inline-flex;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
-}
-
-/* Two angled "pages" forming an open-book spread. */
-.logo__page {
-  position: absolute;
-  bottom: 2px;
-  width: 13px;
-  height: 22px;
-  border-radius: 3px 3px 2px 2px;
-}
-.logo__page--left {
-  left: 1px;
-  background: linear-gradient(
-    160deg,
-    var(--color-primary),
-    var(--color-primary-hover)
-  );
-  transform: skewY(10deg);
-}
-.logo__page--right {
-  right: 1px;
-  background: linear-gradient(200deg, var(--color-accent), var(--color-primary));
-  transform: skewY(-10deg);
+  object-fit: contain;
+  display: block;
 }
 
 .logo__word {

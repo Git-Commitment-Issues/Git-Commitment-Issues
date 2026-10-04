@@ -163,7 +163,7 @@ export function StudentPage() {
           </form>
           <button
             type="button"
-            className="text-link"
+            className="text-link student__join-switch"
             onClick={() => navigate("/s")}
           >
             Enter a different code

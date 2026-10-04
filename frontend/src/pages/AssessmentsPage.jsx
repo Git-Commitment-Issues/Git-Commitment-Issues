@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Plus, FileText, Users, Clock, Hash, Sparkles } from "lucide-react"
 import { PageHeader } from "@/components/layout"
-import { Button, Card, Badge, StatusBadge, EmptyState } from "@/components/ui"
+import { Button, Card, Badge, Modal, StatusBadge, EmptyState } from "@/components/ui"
 import { useClassroom } from "@/session/useClassroom"
 import { useAsync } from "@/hooks/useAsync"
 import { repository, ApiError } from "@/services"
@@ -11,9 +11,9 @@ import "./AssessmentsPage.css"
 
 /**
  * AssessmentsPage — create and manage reading assessments for the active
- * classroom. The card grid, scanner (OCR ImportPanel), and create flow follow
- * the new design; cards load from the backend batch list and open their share
- * screen by access code.
+ * classroom. The card grid, scanner (OCR ImportPanel in a modal), and create
+ * flow follow the new design; cards load from the backend batch list and open
+ * their share screen by access code.
  *
  * Scan-to-draft: after the on-device OCR produces text, "Draft with AI" sends
  * it to the backend extraction endpoint, which uses the chatbot to structure it
@@ -77,14 +77,16 @@ export function AssessmentsPage() {
         }
       />
 
-      {showScanner && (
+      {/* New design: the OCR scanner lives in a modal. */}
+      <Modal open={showScanner} onClose={() => setShowScanner(false)} size="md">
         <ImportPanel
           onApply={({ passage_text }) => {
             setScannedPassage(passage_text)
             setDraftError(null)
+            setShowScanner(false)
           }}
         />
-      )}
+      </Modal>
 
       {scannedPassage && (
         <Card>

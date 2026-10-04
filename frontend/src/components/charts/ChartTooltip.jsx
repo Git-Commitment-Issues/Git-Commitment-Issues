@@ -12,19 +12,25 @@ export function ChartTooltip({ active, payload, label, suffix = '' }) {
   return (
     <div className="chart-tip">
       {label ? <p className="chart-tip__label">{label}</p> : null}
-      {payload.map((entry) => (
-        <p key={entry.name} className="chart-tip__row">
-          <span
-            className="chart-tip__dot"
-            style={{ background: entry.color ?? entry.payload?.fill }}
-          />
-          <span className="chart-tip__name">{entry.name}</span>
-          <span className="chart-tip__value">
-            {entry.value}
-            {suffix}
-          </span>
-        </p>
-      ))}
+      {payload.map((entry) => {
+        // Bars/segments fill with an SVG gradient (url(#…)), which can't paint
+        // an HTML dot — fall back to the brand primary in that case.
+        const raw = entry.color ?? entry.payload?.fill
+        const dot =
+          typeof raw === 'string' && raw.startsWith('url(')
+            ? 'var(--color-primary)'
+            : raw
+        return (
+          <p key={entry.name} className="chart-tip__row">
+            <span className="chart-tip__dot" style={{ background: dot }} />
+            <span className="chart-tip__name">{entry.name}</span>
+            <span className="chart-tip__value">
+              {entry.value}
+              {suffix}
+            </span>
+          </p>
+        )
+      })}
     </div>
   )
 }
