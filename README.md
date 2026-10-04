@@ -1,6 +1,6 @@
-# AnaRead - Reading Comprehension Screener
+# Pahina - Reading Comprehension Screener
 
-AnaRead is an AI-assisted reading-comprehension assessment platform for teachers. Teachers photograph or paste a reading passage, schedule an assessment for their class, and share it with an access code or QR code. Learners answer open-ended questions, an AI provider checks each answer against the expected ideas, and the backend computes a comprehension score and diagnosis. Teachers can review and override any verdict.
+Pahina is an AI-assisted reading-comprehension assessment platform for teachers. Teachers photograph or paste a reading passage, schedule an assessment for their class, and share it with an access code or QR code. Learners answer open-ended questions, an AI provider checks each answer against the expected ideas, and the backend computes a comprehension score and diagnosis. Teachers can review and override any verdict.
 
 ## Features
 
