@@ -1,6 +1,6 @@
 # AnaRead — Frontend
 
-AnaRead is an AI-assisted reading-comprehension assessment platform for Grades 7–12 teachers. This repository is the **frontend only** — the teacher-facing web application. It renders dashboards, student reports, and assessment management against mock data today, and is structured to connect to the Python/Supabase backend later.
+Pahina is an AI-assisted reading-comprehension assessment platform for Grades 7–12 teachers. This repository is the **frontend only** — the teacher-facing web application. It renders dashboards, student reports, and assessment management against mock data today, and is structured to connect to the Python/Supabase backend later.
 
 > Scope: frontend only. No backend, API, or database logic lives here. Backend concepts (API shapes, data models) are referenced for context in `src/data/mockData.js`.
 
